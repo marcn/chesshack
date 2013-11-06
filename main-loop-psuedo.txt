@@ -1,0 +1,64 @@
+# gameBoard represents the current, valid state of the game
+# including which pieces are on which squares
+gameBoard = null
+
+# who's turn is it to move?
+turn = unknown
+
+while true:
+	# read board will return an incomplete gameBoard object, consisting of
+	# the colors of pieces on their respective squares, but not the pieces.
+	# We'll determine what the pieces are based on the diff between the scan
+	# and gameBoard.
+	scanBoard = readBoard()
+
+	if isStartingPosition(scanBoard):
+		# this is a new game
+		gameBoard = startingBoard()
+		turn = white
+	else:
+		# validate the move
+
+		if gameBoard == null or turn == unknown:
+			showWaitingForGameToStart()
+			continue
+		
+		changes = diffBoard(gameBoard, scanBoard)
+				
+		if len(changes) = 0:
+			continue
+	
+		if len(changes) == 1 or len(changes) > 4:
+			# we can't distinguish what move(s) happened.
+			showError()
+			continue
+	
+		if len(changes) == 3 and !isEnPassant(gameBoard, changes, turn):
+			showError()
+			continue
+			
+		if len(changes) == 4 and !isCastle(gameBoard, changes, turn):
+			showError()
+			continue()	
+		
+		if colorOfMove(gameBoard, changes, turn) != turn:
+			showError()
+			continue
+	
+		# at this point, we know that either there's a castle or
+		# two squares have changed, resulting in a piece of turn's color
+		# moving and optionally capturing a piece of turn's opponent.
+		# This is a valid turn for our purposes, we won't verify
+		# the move is legal -- commit the board
+		gameBoard = commitMove(gameBoard, changes)
+	
+	if findComputerColor() == turn:
+		computeAndDisplayMove(gameBoard)
+
+	if turn == white:
+		turn = black
+	else
+		turn = white
+
+	
+	

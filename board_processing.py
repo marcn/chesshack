@@ -117,10 +117,10 @@ class ChessCV():
 
 if __name__ == "__main__":
 	if len(sys.argv) > 1 and sys.argv[1] == "test":
-		ChessCV(scale=1, 'board-pictures/640-480/0.jpg')
-		ChessCV(scale=1, 'board-pictures/640-480/1.jpg')
-		ChessCV(scale=1, 'board-pictures/640-480/2.jpg')
-		ChessCV(scale=1, 'board-pictures/640-480/3.jpg')
-		ChessCV(scale=1, 'board-pictures/640-480/4.jpg')
+		ChessCV(scale=1, file_name='board-pictures/640-480/0.jpg')
+		ChessCV(scale=1, file_name='board-pictures/640-480/1.jpg')
+		ChessCV(scale=1, file_name='board-pictures/640-480/2.jpg')
+		ChessCV(scale=1, file_name='board-pictures/640-480/3.jpg')
+		ChessCV(scale=1, file_name='board-pictures/640-480/4.jpg')
 	else:
 		ChessCV()

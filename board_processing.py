@@ -1,4 +1,4 @@
-import cv2, numpy as np, math
+import cv2, numpy as np, math, random
 from utils import ImgOut
 
 M = lambda x: int(x * 0.5)
@@ -57,15 +57,73 @@ def quantization(img):
 def resize(img):
 	return cv2.resize(img, (M(2592), M(1944)))
 
-def contours(img):
-	contours, hierarchy = cv2.findContours(img, cv2.RETR_LIST, cv2.CHAIN_APPROX_SIMPLE)
-	print "contours", contours
-	print "hierarchy", hierarchy
-	cv2.drawContours(img, contours, -1, (255, 0, 0))
+def bounding_box(points):
+	tl = (None, None)
+	tr = (None, None)
+	bl = (None, None)
+	br = (None, None)
+	for (x, y) in [p[0] for p in points]:
+		if tl[0] is None or x < tl[0]:
+			tl = (x, tl[1])
+		if tl[1] is None or y < tl[1]:
+			tl = (tl[0], y)
+		if tr[0] is None or x > tr[0]:
+			tr = (x, tr[1])
+		if tr[1] is None or y < tr[1]:
+			tr = (tr[0], y)
+		if bl[0] is None or x < bl[0]:
+			bl = (x, bl[1])
+		if bl[1] is None or y > bl[1]:
+			bl = (bl[0], y)
+		if br[0] is None or x > br[0]:
+			br = (x, br[1])
+		if br[1] is None or y > br[1]:
+			br = (br[0], y)
+	return ((tl, br), (tr, bl))
+
+def find_nearest_point(point, points):
+	nearest = (None, 0)
+	for comp_point in points:
+		distance = np.linalg.norm(point - comp_point)
+		if nearest[0] is None or distance < nearest[1]:
+			nearest = (comp_point, distance)
+	return nearest[0]
+
+
+def find_corners(img, original):
+	contours, hierarchy = cv2.findContours(img, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_TC89_KCOS)
 	img_out.save(img)
+
+	area_contours = [(cv2.contourArea(c), c) for c in contours]
+	area_sorted = sorted(area_contours, key=lambda c2: c2[0], reverse=True)
+
+	img_out.save(original)
+
+	cv2.cvtColor(original, cv2.COLOR_BGR2RGBA)
+
+	(tl, br), (tr, bl) = bounding_box(area_sorted[0][1])
+	ta = lambda x: [x[0], x[1]]
+	tl = find_nearest_point(tl, area_sorted[0][1])[0]
+	br = find_nearest_point(br, area_sorted[0][1])[0]
+	tr = find_nearest_point(tr, area_sorted[0][1])[0]
+	bl = find_nearest_point(bl, area_sorted[0][1])[0]
+
+	cv2.polylines(original, [np.array([ta(tl), ta(tr), ta(br), ta(bl)], np.int0)], True, (255, 0, 0), 2)
+
+	img_out.save(original)
+	return (tl, tr, br, bl)
+
+def transform_perspective(img, tl, tr, br, bl):
+	canvas = np.zeros((500, 500, 3), np.uint8)
+	ta = lambda x: [x[0], x[1]]
+	matrix = cv2.getPerspectiveTransform(np.array([ta(tl), ta(tr), ta(br), ta(bl)], np.float32), \
+										 np.array([[0, 0], [499, 0], [499, 499], [0, 499]], np.float32))
+	warp = cv2.warpPerspective(img, matrix, (500, 500))
+	img_out.save(warp)
 
 img = img_out.save(resize(cv2.imread('board-pictures/board2.jpg')))
 gray = img_out.save(cv2.cvtColor(img, cv2.COLOR_BGR2GRAY))
 quant = quantization(gray)
 thresh = threshold(quant)
-cont = contours(thresh)
+(tl, tr, br, bl) = find_corners(thresh, img)
+transform_perspective(img, tl, tr, br, bl)

@@ -34,7 +34,11 @@ class ChessCV():
 
 		criteria = (cv2.TERM_CRITERIA_EPS + cv2.TERM_CRITERIA_MAX_ITER, 10, 1.0)
 		K = 40
-		ret, label, center = cv2.kmeans(Z, K, criteria, 10, cv2.KMEANS_PP_CENTERS)
+
+		if cv2.__version__.find("2.4.6") > -1:
+			ret, label, center = cv2.kmeans(Z, K, criteria, 10, cv2.KMEANS_PP_CENTERS)
+		else:
+			ret, label, center = cv2.kmeans(Z, K, None, criteria, 10, cv2.KMEANS_PP_CENTERS)
 
 		dst = np.uint8(center)
 		dst = dst[label.flatten()]

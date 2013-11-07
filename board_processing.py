@@ -12,22 +12,20 @@ class ChessCV():
 		self.scale = scale
 
 		# find corners of board
-		dst_img = img_out.show(self.grayscale(self.image))
+		dst_img = self.grayscale(self.image)
 		if self.scale != 1:
-			dst_img = img_out.show(self.resize(dst_img))
-		#dst_img = img_out.show(self.quantize(dst_img))
-		dst_img = img_out.show(cv2.GaussianBlur(dst_img, (5, 5), 0))
+			dst_img = self.resize(dst_img)
+		#dst_img = self.quantize(dst_img)
+		dst_img = cv2.GaussianBlur(dst_img, (5, 5), 0)
 		try:
-			dst_img_thresh = img_out.show(self.threshold(dst_img))
+			dst_img_thresh = self.threshold(dst_img)
 			(tl, tr, br, bl) = self.find_corners(dst_img_thresh)
 		except IndexError:
 			(tl, tr, br, bl) = self.find_corners(dst_img)
 
 		# fix perspective
 		dst_img = self.warp_perspective(self.image, tl, tr, br, bl)
-
 		img_out.show(dst_img)
-		img_out.save(dst_img)
 
 	def resize(self, img):
 		new_dimensions = (int(self.dimensions[0] * 0.5), int(self.dimensions[1] * 0.5))

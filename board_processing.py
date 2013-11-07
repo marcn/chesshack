@@ -12,11 +12,12 @@ class ChessCV():
 		self.dimensions = (len(self.image[0]), len(self.image))
 
 		# find corners of board
-		dst_img = self.grayscale(self.image)
-		dst_img = self.resize(dst_img)
-		dst_img = img_out.save(self.quantize(dst_img))
+		dst_img = img_out.show(self.grayscale(self.image))
+		dst_img = img_out.show(self.resize(dst_img))
+		#dst_img = img_out.show(self.quantize(dst_img))
+		dst_img = img_out.show(cv2.GaussianBlur(dst_img, (5, 5), 0))
 		try:
-			dst_img_thresh = img_out.save(self.threshold(dst_img))
+			dst_img_thresh = img_out.show(self.threshold(dst_img))
 			(tl, tr, br, bl) = self.find_corners(dst_img_thresh)
 		except IndexError:
 			(tl, tr, br, bl) = self.find_corners(dst_img)
@@ -24,9 +25,8 @@ class ChessCV():
 		# fix perspective
 		dst_img = img_out.save(self.warp_perspective(self.image, tl, tr, br, bl))
 
-		cv2.imshow('win1', dst_img)
-		cv2.waitKey(0)
-		cv2.destroyAllWindows()
+		img_out.show(dst_img)
+		img_out.save(dst_img)
 
 	def resize(self, img):
 		new_dimensions = (int(self.dimensions[0] * self.scale), int(self.dimensions[1] * self.scale))
@@ -36,9 +36,6 @@ class ChessCV():
 		return cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
 
 	def quantize(self, img):
-		# blur image
-		#cv2.GaussianBlur()
-
 		Z = img.reshape((-1, 3))
 		Z = np.float32(Z)
 

@@ -97,13 +97,13 @@ class ChessCV():
 				br = (br[0], y)
 		return ((tl, br), (tr, bl))
 
-import timeit
+import time
 print cv2.__version__
 for x in np.arange(0.05, 1, 0.05):
 	try:
-		t = timeit.Timer()
+		t = int(round(time.time() * 1000))
 		ChessCV('board-pictures/board3.jpg', x)
-		print x, t.timeit()
+		print x, int(round(time.time() * 1000)) - t
 	except:
 		print x, 'failed'
 		raise

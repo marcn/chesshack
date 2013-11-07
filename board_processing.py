@@ -1,4 +1,5 @@
-import cv2, numpy as np, math, random, time
+import cv2, numpy as np
+from timeit import Timer
 from utils import ImgOut
 from scipy.cluster.vq import kmeans
 
@@ -15,8 +16,11 @@ class ChessCV():
 		dst_img = img_out.save(self.grayscale(self.image))
 		dst_img = img_out.save(self.resize(dst_img))
 		dst_img = img_out.save(self.quantize(dst_img))
-		dst_img = img_out.save(self.threshold(dst_img))
-		(tl, tr, br, bl) = self.find_corners(dst_img)
+		try:
+			dst_img_thresh = img_out.save(self.threshold(dst_img))
+			(tl, tr, br, bl) = self.find_corners(dst_img_thresh)
+		except IndexError:
+			(tl, tr, br, bl) = self.find_corners(dst_img)
 
 		# fix perspective
 		dst_img = img_out.save(self.warp_perspective(self.image, tl, tr, br, bl))
@@ -33,7 +37,7 @@ class ChessCV():
 		Z = np.float32(Z)
 
 		criteria = (cv2.TERM_CRITERIA_EPS + cv2.TERM_CRITERIA_MAX_ITER, 10, 1.0)
-		K = 4
+		K = 3
 
 		if cv2.__version__.find("2.4.6") > -1:
 			ret, label, center = cv2.kmeans(Z, K, criteria, 10, cv2.KMEANS_RANDOM_CENTERS)
@@ -46,7 +50,8 @@ class ChessCV():
 
 	def threshold(self, img):
 		#return cv2.adaptiveThreshold(img, 255, cv2.ADAPTIVE_THRESH_MEAN_C, cv2.THRESH_BINARY, 11, 2)
-		return cv2.threshold(img, 220, 255, cv2.THRESH_BINARY)[1]
+		#return cv2.threshold(img, 220, 255, cv2.THRESH_BINARY)[1]
+		return cv2.threshold(img, 50, 255, cv2.THRESH_BINARY)[1]
 
 	def find_corners(self, img):
 		contours, hierarchy = cv2.findContours(img, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_TC89_KCOS)
@@ -102,4 +107,4 @@ class ChessCV():
 				br = (br[0], y)
 		return ((tl, br), (tr, bl))
 
-ChessCV('board-pictures/board3.jpg', scale=0.25)
+ChessCV('board-pictures/640-480/0.jpg', scale=1)

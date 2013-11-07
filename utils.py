@@ -1,7 +1,7 @@
 import cv2, numpy as np, shlex, subprocess
 
 def next_frame():
-	args = shlex.split("raspistill -w 640 -h 480 -t 1000 -o -")
+	args = shlex.split("raspistill -w 640 -h 480 -t 0 -n -o -")
 	p = subprocess.Popen(args, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
 	out, err = p.communicate()
 	nparr = np.frombuffer(out, dtype='uint8')

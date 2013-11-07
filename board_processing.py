@@ -33,36 +33,26 @@ class ChessCV():
 		Z = np.float32(Z)
 
 		criteria = (cv2.TERM_CRITERIA_EPS + cv2.TERM_CRITERIA_MAX_ITER, 10, 1.0)
-		K = 3
+		K = 4
 
 		if cv2.__version__.find("2.4.6") > -1:
-			ret, label, center = cv2.kmeans(Z, K, criteria, 10, cv2.KMEANS_PP_CENTERS)
+			ret, label, center = cv2.kmeans(Z, K, criteria, 10, cv2.KMEANS_RANDOM_CENTERS)
 		else:
-			ret, label, center = cv2.kmeans(Z, K, None, criteria, 10, cv2.KMEANS_PP_CENTERS)
+			ret, label, center = cv2.kmeans(Z, K, None, criteria, 10, cv2.KMEANS_RANDOM_CENTERS)
 
 		dst = np.uint8(center)
 		dst = dst[label.flatten()]
 		return dst.reshape((img.shape))
 
-	def contrast(self, img):
-		phi = 1
-		theta = 1
-		intensity = 255
-		dst = (255 / 1) * (img / (intensity / theta)) ** 0.5
-		dst = np.array(dst, dtype=np.uint8)
-		return dst
-
 	def threshold(self, img):
-		return cv2.adaptiveThreshold(img, 127, cv2.ADAPTIVE_THRESH_MEAN_C, cv2.THRESH_BINARY, 11, 2)
-		#return cv2.threshold(img, 220, 255, cv2.THRESH_BINARY)[1]
+		#return cv2.adaptiveThreshold(img, 255, cv2.ADAPTIVE_THRESH_MEAN_C, cv2.THRESH_BINARY, 11, 2)
+		return cv2.threshold(img, 220, 255, cv2.THRESH_BINARY)[1]
 
 	def find_corners(self, img):
-		contours, hierarchy = cv2.findContours(img, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
+		contours, hierarchy = cv2.findContours(img, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_TC89_KCOS)
 
 		contour_areas = [(cv2.contourArea(c), c) for c in contours]
 		contours_sorted = sorted(contour_areas, key=lambda c2: c2[0], reverse=True)
-
-		print "total contours", len(contour_areas)
 
 		(tl, br), (tr, bl) = self.bounding_box(contours_sorted[0][1])
 
@@ -112,6 +102,4 @@ class ChessCV():
 				br = (br[0], y)
 		return ((tl, br), (tr, bl))
 
-t = int(round(time.time() * 1000))
-ChessCV('board-pictures/board2.jpg')
-print "scale %d%%" % int(0.25 * 100), int(round(time.time() * 1000)) - t
+ChessCV('board-pictures/board3.jpg', scale=0.25)

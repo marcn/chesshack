@@ -10,3 +10,4 @@ class ImgOut():
 		else:
 			cv2.imwrite('board-%d.jpg' % self.counter, img)
 			self.counter += 1
+			return img

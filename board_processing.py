@@ -6,7 +6,8 @@ M = lambda x: int(x * 0.5)
 img_out = ImgOut()
 
 def threshold(img):
-	return img_out.save(cv2.adaptiveThreshold(img, 255, cv2.ADAPTIVE_THRESH_GAUSSIAN_C, cv2.THRESH_BINARY, 11, 0))
+	#return img_out.save(cv2.adaptiveThreshold(img, 255, cv2.ADAPTIVE_THRESH_GAUSSIAN_C, cv2.THRESH_BINARY_INV, 11, 0))
+	return img_out.save(cv2.threshold(img, 220, 255, cv2.THRESH_BINARY)[1])
 
 def harris_corner(img):
 	gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
@@ -57,8 +58,14 @@ def resize(img):
 	return cv2.resize(img, (M(2592), M(1944)))
 
 def contours(img):
-	pass
+	contours, hierarchy = cv2.findContours(img, cv2.RETR_LIST, cv2.CHAIN_APPROX_SIMPLE)
+	print "contours", contours
+	print "hierarchy", hierarchy
+	cv2.drawContours(img, contours, -1, (255, 0, 0))
+	img_out.save(img)
 
 img = img_out.save(resize(cv2.imread('board-pictures/board2.jpg')))
 gray = img_out.save(cv2.cvtColor(img, cv2.COLOR_BGR2GRAY))
-contours(quantization(gray))
+quant = quantization(gray)
+thresh = threshold(quant)
+cont = contours(thresh)

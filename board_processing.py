@@ -1,4 +1,4 @@
-import cv2, numpy as np, math, random
+import cv2, numpy as np, math, random, time
 from utils import ImgOut
 
 img_out = ImgOut()
@@ -6,20 +6,29 @@ img_out = ImgOut()
 class ChessCV():
 
 	def __init__(self, file_name, scale=0.25):
+		t = int(round(time.time() * 1000))
 		self.image = cv2.imread(file_name)
+		print "read img", (int(round(time.time() * 1000)) - t)
 		self.scale = scale
 		self.dimensions = (len(self.image[0]), len(self.image))
 
 		# find corners of board
+		t = int(round(time.time() * 1000))
 		dst_img = self.grayscale(self.image)
 		dst_img = self.resize(dst_img)
 		# dst_img = self.quantize(dst_img)
 		dst_img = self.threshold(dst_img)
 		(tl, tr, br, bl) = self.find_corners(dst_img)
+		print "find corners", (int(round(time.time() * 1000)) - t)
 
 		# fix perspective
+		t = int(round(time.time() * 1000))
 		dst_img = self.warp_perspective(self.image, tl, tr, br, bl)
+		print "wrap perspective", (int(round(time.time() * 1000)) - t)
+
+		t = int(round(time.time() * 1000))
 		img_out.save(dst_img)
+		print "save img", (int(round(time.time() * 1000)) - t)
 
 	def resize(self, img):
 		new_dimensions = (int(self.dimensions[0] * self.scale), int(self.dimensions[1] * self.scale))
@@ -97,13 +106,12 @@ class ChessCV():
 				br = (br[0], y)
 		return ((tl, br), (tr, bl))
 
-import time
-print cv2.__version__
-for x in np.arange(0.05, 1, 0.05):
+for x in np.arange(0.25, 1.25, 0.25):
 	try:
 		t = int(round(time.time() * 1000))
 		ChessCV('board-pictures/board3.jpg', x)
-		print x, int(round(time.time() * 1000)) - t
+		print "scale %d%%" % int(x * 100), int(round(time.time() * 1000)) - t
 	except:
 		print x, 'failed'
 		raise
+	print

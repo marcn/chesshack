@@ -1,7 +1,6 @@
 import cv2, numpy as np
 from timeit import Timer
 from utils import ImgOut
-from scipy.cluster.vq import kmeans
 
 img_out = ImgOut()
 
@@ -13,8 +12,8 @@ class ChessCV():
 		self.dimensions = (len(self.image[0]), len(self.image))
 
 		# find corners of board
-		dst_img = img_out.save(self.grayscale(self.image))
-		dst_img = img_out.save(self.resize(dst_img))
+		dst_img = self.grayscale(self.image)
+		dst_img = self.resize(dst_img)
 		dst_img = img_out.save(self.quantize(dst_img))
 		try:
 			dst_img_thresh = img_out.save(self.threshold(dst_img))
@@ -25,6 +24,10 @@ class ChessCV():
 		# fix perspective
 		dst_img = img_out.save(self.warp_perspective(self.image, tl, tr, br, bl))
 
+		cv2.imshow('win1', dst_img)
+		cv2.waitKey(0)
+		cv2.destroyAllWindows()
+
 	def resize(self, img):
 		new_dimensions = (int(self.dimensions[0] * self.scale), int(self.dimensions[1] * self.scale))
 		return cv2.resize(img, new_dimensions)
@@ -33,6 +36,9 @@ class ChessCV():
 		return cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
 
 	def quantize(self, img):
+		# blur image
+		#cv2.GaussianBlur()
+
 		Z = img.reshape((-1, 3))
 		Z = np.float32(Z)
 
@@ -49,23 +55,29 @@ class ChessCV():
 		return dst.reshape((img.shape))
 
 	def threshold(self, img):
-		#return cv2.adaptiveThreshold(img, 255, cv2.ADAPTIVE_THRESH_MEAN_C, cv2.THRESH_BINARY, 11, 2)
+		return cv2.adaptiveThreshold(img, 255, cv2.ADAPTIVE_THRESH_GAUSSIAN_C, cv2.THRESH_BINARY, 7, 0)
 		#return cv2.threshold(img, 220, 255, cv2.THRESH_BINARY)[1]
-		return cv2.threshold(img, 50, 255, cv2.THRESH_BINARY)[1]
+		#return cv2.threshold(img, 180, 255, cv2.THRESH_BINARY)[1]
 
 	def find_corners(self, img):
-		contours, hierarchy = cv2.findContours(img, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_TC89_KCOS)
+		contours, hierarchy = cv2.findContours(img, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
 
-		contour_areas = [(cv2.contourArea(c), c) for c in contours]
-		contours_sorted = sorted(contour_areas, key=lambda c2: c2[0], reverse=True)
+		print "tot contours", len(contours)
 
-		(tl, br), (tr, bl) = self.bounding_box(contours_sorted[0][1])
+		best_match = (None, 0)
+		for contour in contours:
+			area = cv2.contourArea(contour)
+			if area > 100:
+				peri = cv2.arcLength(contour, True)
+				approx = cv2.approxPolyDP(contour, 0.02 * peri, True)
+				if area > best_match[1] and len(approx) == 4:
+					best_match = (contour, area)
 
-		board_contour = contours_sorted[0][1]
-		tl = self.find_nearest_point(tl, board_contour)
-		br = self.find_nearest_point(br, board_contour)
-		tr = self.find_nearest_point(tr, board_contour)
-		bl = self.find_nearest_point(bl, board_contour)
+		(tl, br), (tr, bl) = self.bounding_box(best_match[0])
+		tl = self.find_nearest_point(tl, best_match[0])
+		br = self.find_nearest_point(br, best_match[0])
+		tr = self.find_nearest_point(tr, best_match[0])
+		bl = self.find_nearest_point(bl, best_match[0])
 
 		return (tl, tr, br, bl)
 

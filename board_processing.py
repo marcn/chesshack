@@ -1,19 +1,18 @@
 import cv2, numpy as np
 from timeit import Timer
-from utils import ImgOut
+from utils import ImgOut, next_frame
 
 img_out = ImgOut()
 
 class ChessCV():
 
-	def __init__(self, file_name, scale=0.25):
-		self.image = cv2.imread(file_name)
-		self.scale = scale
+	def __init__(self, file_name=None):
+		self.image = cv2.imread(file_name) if file_name is not None else next_frame()
 		self.dimensions = (len(self.image[0]), len(self.image))
 
 		# find corners of board
 		dst_img = img_out.show(self.grayscale(self.image))
-		dst_img = img_out.show(self.resize(dst_img))
+		#dst_img = img_out.show(self.resize(dst_img))
 		#dst_img = img_out.show(self.quantize(dst_img))
 		dst_img = img_out.show(cv2.GaussianBlur(dst_img, (5, 5), 0))
 		try:
@@ -23,13 +22,13 @@ class ChessCV():
 			(tl, tr, br, bl) = self.find_corners(dst_img)
 
 		# fix perspective
-		dst_img = img_out.save(self.warp_perspective(self.image, tl, tr, br, bl))
+		dst_img = self.warp_perspective(self.image, tl, tr, br, bl)
 
 		img_out.show(dst_img)
 		img_out.save(dst_img)
 
 	def resize(self, img):
-		new_dimensions = (int(self.dimensions[0] * self.scale), int(self.dimensions[1] * self.scale))
+		new_dimensions = (int(self.dimensions[0] * 0.5), int(self.dimensions[1] * 0.5))
 		return cv2.resize(img, new_dimensions)
 
 	def grayscale(self, img):
@@ -117,3 +116,7 @@ class ChessCV():
 		return ((tl, br), (tr, bl))
 
 ChessCV('board-pictures/640-480/0.jpg', scale=1)
+ChessCV('board-pictures/640-480/1.jpg', scale=1)
+ChessCV('board-pictures/640-480/2.jpg', scale=1)
+ChessCV('board-pictures/640-480/3.jpg', scale=1)
+ChessCV('board-pictures/640-480/4.jpg', scale=1)

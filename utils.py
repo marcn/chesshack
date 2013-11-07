@@ -1,4 +1,11 @@
-import cv2
+import cv2, numpy as np, shlex, subprocess
+
+def next_frame():
+	args = shlex.split("raspistill -w 640 -h 480 -t 1000 -o -")
+	p = subprocess.Popen(args, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+	out, err = p.communicate()
+	nparr = np.frombuffer(out, dtype='uint8')
+	return cv2.imdecode(nparr, 1)
 
 class ImgOut():
 	counter = 1

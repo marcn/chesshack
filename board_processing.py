@@ -33,7 +33,7 @@ class ChessCV():
 		Z = np.float32(Z)
 
 		criteria = (cv2.TERM_CRITERIA_EPS + cv2.TERM_CRITERIA_MAX_ITER, 10, 1.0)
-		K = 40
+		K = 3
 
 		if cv2.__version__.find("2.4.6") > -1:
 			ret, label, center = cv2.kmeans(Z, K, criteria, 10, cv2.KMEANS_PP_CENTERS)

@@ -5,15 +5,15 @@ img_out = ImgOut()
 
 class ChessCV():
 
-	def __init__(self, file_name):
+	def __init__(self, file_name, scale=0.25):
 		self.image = cv2.imread(file_name)
-		self.scale = 0.5
+		self.scale = scale
 		self.dimensions = (len(self.image[0]), len(self.image))
 
 		# find corners of board
 		dst_img = self.grayscale(self.image)
 		dst_img = self.resize(dst_img)
-		dst_img = self.quantize(dst_img)
+		# dst_img = self.quantize(dst_img)
 		dst_img = self.threshold(dst_img)
 		(tl, tr, br, bl) = self.find_corners(dst_img)
 
@@ -97,4 +97,13 @@ class ChessCV():
 				br = (br[0], y)
 		return ((tl, br), (tr, bl))
 
-ChessCV('board-pictures/board3.jpg')
+import timeit
+print cv2.__version__
+for x in np.arange(0.05, 1, 0.05):
+	try:
+		t = timeit.Timer()
+		ChessCV('board-pictures/board3.jpg', x)
+		print x, t.timeit()
+	except:
+		print x, 'failed'
+		raise

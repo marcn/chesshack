@@ -1,4 +1,4 @@
-import cv2, numpy as np
+import cv2, numpy as np, sys
 from timeit import Timer
 from utils import ImgOut, next_frame
 
@@ -6,13 +6,15 @@ img_out = ImgOut()
 
 class ChessCV():
 
-	def __init__(self, file_name=None):
+	def __init__(self, scale=1, file_name=None):
 		self.image = cv2.imread(file_name) if file_name is not None else next_frame()
 		self.dimensions = (len(self.image[0]), len(self.image))
+		self.scale = scale
 
 		# find corners of board
 		dst_img = img_out.show(self.grayscale(self.image))
-		#dst_img = img_out.show(self.resize(dst_img))
+		if self.scale != 1:
+			dst_img = img_out.show(self.resize(dst_img))
 		#dst_img = img_out.show(self.quantize(dst_img))
 		dst_img = img_out.show(cv2.GaussianBlur(dst_img, (5, 5), 0))
 		try:
@@ -57,8 +59,6 @@ class ChessCV():
 
 	def find_corners(self, img):
 		contours, hierarchy = cv2.findContours(img, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
-
-		print "tot contours", len(contours)
 
 		best_match = (None, 0)
 		for contour in contours:
@@ -115,8 +115,12 @@ class ChessCV():
 				br = (br[0], y)
 		return ((tl, br), (tr, bl))
 
-ChessCV('board-pictures/640-480/0.jpg', scale=1)
-ChessCV('board-pictures/640-480/1.jpg', scale=1)
-ChessCV('board-pictures/640-480/2.jpg', scale=1)
-ChessCV('board-pictures/640-480/3.jpg', scale=1)
-ChessCV('board-pictures/640-480/4.jpg', scale=1)
+if __name__ == "__main__":
+	if len(sys.argv) > 1 and sys.argv[1] == "test":
+		ChessCV(scale=1, 'board-pictures/640-480/0.jpg')
+		ChessCV(scale=1, 'board-pictures/640-480/1.jpg')
+		ChessCV(scale=1, 'board-pictures/640-480/2.jpg')
+		ChessCV(scale=1, 'board-pictures/640-480/3.jpg')
+		ChessCV(scale=1, 'board-pictures/640-480/4.jpg')
+	else:
+		ChessCV()

@@ -26,7 +26,6 @@ class ChessCV():
 
 		# fix perspective
 		dst_img = self.warp_perspective(self.image, tl, tr, br, bl)
-		img_out.show(dst_img)
 
 		# classify board
 		classifier = BoardClassifier()
@@ -41,6 +40,9 @@ class ChessCV():
 			for j in range(0,8):
 				print numeric_classification_matrix[i][j],
 			print
+
+		classifier.markup_board(dst_img)
+		img_out.show(dst_img)
 
 	def resize(self, img):
 		new_dimensions = (int(self.dimensions[0] * 0.5), int(self.dimensions[1] * 0.5))

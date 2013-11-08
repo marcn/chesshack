@@ -32,10 +32,10 @@ class ChessEngine:
 	def makeMove(self, fen):
 		self.bestmove = None
 		self.pipe.stdin.write('position fen %s\n' % fen)	# set current position
-		self.pipe.stdin.write('go movetime 10000\n')	# set current position
 		thread.start_new_thread(self.waitForBestMove, (self,))
 
 	def waitForBestMove(self, blah):
 		print "self is: " + str(self)
+		self.pipe.stdin.write('go movetime 10000\n')	# give CPU 10 seconds
 		self.bestmove = self.waitFor('bestmove').split()[1]
 		

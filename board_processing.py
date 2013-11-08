@@ -1,6 +1,7 @@
 import cv2, numpy as np, sys
 from timeit import Timer
 from utils import ImgOut, next_frame
+from boardClassifier import BoardClassifier
 
 img_out = ImgOut()
 
@@ -26,6 +27,20 @@ class ChessCV():
 		# fix perspective
 		dst_img = self.warp_perspective(self.image, tl, tr, br, bl)
 		img_out.show(dst_img)
+
+		# classify board
+		classifier = BoardClassifier()
+		classification = classifier.make_classification_matrix(dst_img)
+		for i in range(0,8):
+			for j in range(0,8):
+				print classification[i][j],
+				print
+
+		numeric_classification_matrix = classifier.make_numeric_classification_matrix(classification)
+		for i in range(0,8):
+			for j in range(0,8):
+				print numeric_classification_matrix[i][j],
+				print
 
 	def resize(self, img):
 		new_dimensions = (int(self.dimensions[0] * 0.5), int(self.dimensions[1] * 0.5))

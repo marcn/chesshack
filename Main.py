@@ -287,10 +287,10 @@ class UserInterface:
 							print "**** CHEATER!!! ****"
 						if self.chess.isCheck():
 							print "**** CHECK ****"
-							self.bottomHeading = self.self.check
+							self.bottomHeading = self.check
 						else:
 							self.bottomHeading = None
-							self.bottomHeading = self.self.check
+							self.bottomHeading = self.check
 						if self.chess.getTurn() == ChessBoard.WHITE:
 							print "White's turn"
 						else:

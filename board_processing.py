@@ -38,35 +38,25 @@ class ChessCV():
 		self.file_name = file_name
 
 	def current_board(self):
-		timer = Timer()
-		timer.start("Image read")
 		self.image = cv2.imread(self.file_name) if self.file_name is not None else next_frame()
 		self.dimensions = (len(self.image[0]), len(self.image))
 
 		# find corners of board
-		timer.start("Grayscale")
 		dst_img = self.grayscale(self.image)
 		if self.scale != 1:
-			timer.start("Resize")
 			dst_img = self.resize(dst_img)
 		#dst_img = self.quantize(dst_img)
-		timer.start("Gaussian blur")
 		dst_img = cv2.GaussianBlur(dst_img, (5, 5), 0)
 		try:
-			timer.start("Threshold")
 			dst_img_thresh = self.threshold(dst_img)
-			timer.start("Find corners")
 			(tl, tr, br, bl) = self.find_corners(dst_img_thresh)
 		except IndexError:
-			timer.start("Find corners (2)")
 			(tl, tr, br, bl) = self.find_corners(dst_img)
 
 		# fix perspective
-		timer.start("Warp perspective")
 		dst_img = self.warp_perspective(self.image, tl, tr, br, bl)
 
 		# classify board
-		timer.start("Classify board")
 		dst_img = cv2.cvtColor(dst_img, cv2.COLOR_BGR2GRAY)
 		classifier = BoardClassifier()
 		classification = classifier.make_classification_matrix(dst_img)
@@ -77,7 +67,6 @@ class ChessCV():
 
 		numeric_classification_matrix = classifier.make_numeric_classification_matrix(classification)
 
-		timer.done()
 		return numeric_classification_matrix
 
 	def resize(self, img):
@@ -109,11 +98,8 @@ class ChessCV():
 		#return cv2.threshold(img, 180, 255, cv2.THRESH_BINARY)[1]
 
 	def find_corners(self, img):
-		timer = Timer()
-		timer.start("Find Contours")
 		contours, hierarchy = cv2.findContours(img, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
 
-		timer.start("Find Largest")
 		best_match = (None, 0, None)
 		for contour in contours:
 			area = cv2.contourArea(contour)
@@ -125,7 +111,6 @@ class ChessCV():
 
 		mean_point = np.average(best_match[2], axis=0)[0]
 
-		timer.start("Match polygon points")
 		tl, br, tr, bl = (None, None, None, None)
 		for point in best_match[2]:
 			point = point[0]
@@ -140,7 +125,6 @@ class ChessCV():
 				elif point[1] > mean_point[1]:
 					br = point
 
-		timer.done()
 		return (tl, tr, br, bl)
 
 	def warp_perspective(self, img, tl, tr, br, bl):

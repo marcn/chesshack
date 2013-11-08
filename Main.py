@@ -45,9 +45,9 @@ class UserInterface:
 		self.pieces['K'] = self.loadImage("wk.png")
 		self.pieces['Q'] = self.loadImage("wq.png")
 		self.pieces['P'] = self.loadImage("wp.png")
-		#self.screen = pygame.display.set_mode((800, 800))
+		self.screen = pygame.display.set_mode((800, 800))
 		#self.screen = pygame.display.set_mode((1824, 1016))
-		self.screen = pygame.display.set_mode((0,0), pygame.FULLSCREEN)
+		#self.screen = pygame.display.set_mode((0,0), pygame.FULLSCREEN)
 		pygame.display.flip()
 
 	def loadImage(self, file):
@@ -71,6 +71,8 @@ class UserInterface:
 					print event.key
 					if event.key == K_ESCAPE:
 						return
+					if event.key == 32: # space
+						self.boardscan = self.cv.current_board()
 					if event.key == 49:	# 1
 						self.boardscan = self.startingPos.copy()
 					if event.key == 50:	# 2
@@ -87,7 +89,6 @@ class UserInterface:
 
 
 	def readBoard(self):
-		self.boardscan = self.cv.current_board()
 		self.updateConsideringLine()
 		if np.array_equal(self.boardscan, self.startingPos) and self.chess is None:
 			print "creating chess board"

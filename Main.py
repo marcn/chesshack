@@ -153,7 +153,9 @@ class UserInterface:
 								moveTo = change
 				print "moveFrom: " + str(moveFrom)
 				print "moveTo:   " + str(moveTo)
+				print "getTurn before:", self.chess.getTurn()
 				result = self.chess.addMove(moveFrom, moveTo)
+				print "getTurn after:", self.chess.getTurn()
 				if result is False:
 					print "Could not make move: ", self.chess.getReason()
 				self.chess.printBoard()

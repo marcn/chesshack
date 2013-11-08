@@ -34,13 +34,13 @@ class ChessCV():
 		for i in range(0,8):
 			for j in range(0,8):
 				print classification[i][j],
-				print
+			print
 
 		numeric_classification_matrix = classifier.make_numeric_classification_matrix(classification)
 		for i in range(0,8):
 			for j in range(0,8):
 				print numeric_classification_matrix[i][j],
-				print
+			print
 
 	def resize(self, img):
 		new_dimensions = (int(self.dimensions[0] * 0.5), int(self.dimensions[1] * 0.5))

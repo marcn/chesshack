@@ -132,7 +132,7 @@ class UserInterface:
 		elif self.state == UserInterface.STATE_WAITING_FOR_BOARD_CHANGE:
 			changes = self.boardscan - self.lastBoardscan
 			numChanges = np.count_nonzero(changes)
-			if numChanges > 0:
+			if numChanges > 1:
 				print ""
 				print "changes:\n" + str(changes)
 				moveFrom = ()

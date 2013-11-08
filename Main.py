@@ -27,8 +27,8 @@ class UserInterface:
 			[ 0, 0, 0, 0, 0, 0, 0, 0],
 			[ 1, 1, 1, 1, 1, 1, 1, 1],
 			[ 1, 1, 1, 1, 1, 1, 1, 1]], np.int8)
-		self.cv = ChessCV()
-		#self.cv = MockCV()
+		#self.cv = ChessCV()
+		self.cv = MockCV()
 		self.cv.continuous = True
 		thread.start_new_thread(self.cvThread, (self,))
 		self.clearBoardScan()
@@ -135,7 +135,7 @@ class UserInterface:
 		elif self.state == UserInterface.STATE_WAITING_FOR_BOARD_CHANGE:
 			changes = self.boardscan - self.lastBoardscan
 			numChanges = np.count_nonzero(changes)
-			if numChanges > 1:
+			if numChanges == 2 or numChanges == 3 or numChanges == 4:
 				print ""
 				print "changes:\n" + str(changes)
 				moveFrom = ()
@@ -198,7 +198,10 @@ class UserInterface:
 							# It's not black's turn, engage the engine
 							self.engine.makeMove(self.chess.getFEN())
 							self.state = UserInterface.STATE_WAITING_FOR_ENGINE
-				self.clearBoardScan()
+			elif numChanges != 0:
+				print "Invalid number of board changes: ", numChanges
+			# Set boardscan to the last one just so we don't keep analyzing it until next scan comes in
+			self.boardscan = self.lastBoardscan
 			self.renderBoard()
 
 

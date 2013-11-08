@@ -16,6 +16,7 @@ class UserInterface:
 	STATE_WAITING_FOR_START_POS = 0
 	STATE_WAITING_FOR_BOARD_CHANGE = 1
 	STATE_WAITING_FOR_ENGINE = 2
+	STATE_GAME_OVER = 3
 
 	def __init__(self):
 		self.state = UserInterface.STATE_WAITING_FOR_START_POS
@@ -192,13 +193,25 @@ class UserInterface:
 						lastMove = string.replace(self.chess.getLastTextMove(ChessBoard.AN), '-', '')
 						if self.requestedMove is not None and self.requestedMove != lastMove:
 							print "**** CHEATER!!! ****"
+						if self.chess.isCheck():
+							print "**** CHECK ****"
 						self.requestedMove = None
 						self.lastBoardscan = self.boardscan
 						self.chess.printBoard()
 						print "Last move type: " + str(self.chess.getLastMoveType())
 						self.renderBoard()
 						print "New FEN: " + self.chess.getFEN()
-						if self.chess.getTurn() == ChessBoard.BLACK:
+						# Check if game is over
+						if self.chess.isGameOver():
+							result = self.chess.getGameResult()
+							if result == ChessBoard.WHITE_WIN:
+								print "**** WHITE WINS ****"
+							elif result == ChessBoard.BLACK_WIN:
+								print "**** BLACK WINS ****"
+							else:
+								print "**** STALEMATE ****"
+							self.state = UserInterface.STATE_GAME_OVER
+						elif self.chess.getTurn() == ChessBoard.BLACK:
 							# It's not black's turn, engage the engine
 							self.engine.makeMove(self.chess.getFEN())
 							self.state = UserInterface.STATE_WAITING_FOR_ENGINE

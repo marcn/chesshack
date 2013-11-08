@@ -11,7 +11,7 @@ from pygame.locals import *
 
 class UserInterface:
 
-	ROTATIONS_RIGHT = 1
+	ROTATIONS_RIGHT = 2
 
 	STATE_WAITING_FOR_START_POS = 0
 	STATE_WAITING_FOR_BOARD_CHANGE = 1

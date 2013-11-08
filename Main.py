@@ -273,12 +273,15 @@ class UserInterface:
 				
 	def cvThread(self, cv):
 		while True:
-			if self.state == UserInterface.STATE_WAITING_FOR_BOARD_CHANGE or self.state == UserInterface.STATE_WAITING_FOR_START_POS:
-				if self.cv.continuous == True or self.cv.snapshot == True:
-					self.cv.snapshot = False
-					sys.stdout.write('.')
-					sys.stdout.flush()
-					self.boardscan = self.cv.current_board()
+			try:
+				if self.state == UserInterface.STATE_WAITING_FOR_BOARD_CHANGE or self.state == UserInterface.STATE_WAITING_FOR_START_POS:
+					if self.cv.continuous == True or self.cv.snapshot == True:
+						self.cv.snapshot = False
+						sys.stdout.write('.')
+						sys.stdout.flush()
+						self.boardscan = self.cv.current_board()
+			catch e:
+				print e
 			time.sleep(0.25)
 
 

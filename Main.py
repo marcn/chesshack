@@ -280,7 +280,7 @@ class UserInterface:
 						sys.stdout.write('.')
 						sys.stdout.flush()
 						self.boardscan = self.cv.current_board()
-			catch e:
+			except Exception, e:
 				print e
 			time.sleep(0.25)
 

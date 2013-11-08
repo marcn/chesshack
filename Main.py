@@ -32,6 +32,7 @@ class UserInterface:
 			[ 1, 1, 1, 1, 1, 1, 1, 1]], np.int8)
 		if sys.platform == 'darwin':
 			self.cv = MockCV()
+			UserInterface.ROTATIONS_RIGHT = 0
 		else:
 			self.cv = ChessCV()
 		self.cv.continuous = True
@@ -39,14 +40,16 @@ class UserInterface:
 		self.boardscan = np.ndarray(shape=(8,8), dtype=np.int8)
 		self.boardscan.fill(0)
 		self.chess = None
-		self.boardScale = 1.5
+		self.boardScale = 2
 		self.considering = []
 		self.lastConsider = None
 		self.requestedMove = None
-		self.screen = pygame.display.set_mode((800, 800))
-		#self.screen = pygame.display.set_mode((1824, 1016))
+		pygame.init()
+		#self.screen = pygame.display.set_mode((800, 800))
+		self.screen = pygame.display.set_mode((1824, 1016))
 		#self.screen = pygame.display.set_mode((0,0), pygame.FULLSCREEN)
-		self.bgimage = self.loadImage("53.png")
+		self.bgimage = pygame.image.load("./img/background.png")
+		self.boardbg = self.loadImage("board.gif")
 		self.pieces = {}
 		self.pieces['r'] = self.loadImage("br.png")
 		self.pieces['n'] = self.loadImage("bn.png")
@@ -67,8 +70,10 @@ class UserInterface:
 		rect = img.get_rect()
 		return pygame.transform.smoothscale(img, (int(rect.w * self.boardScale), int(rect.h * self.boardScale)))
 
+	def getFont(self, size):
+		return pygame.font.SysFont("freesans", size, bold=True)
+
 	def mainLoop(self):    
-		pygame.init()
 		clock = pygame.time.Clock()
 		self.renderBoard()
 
@@ -195,6 +200,10 @@ class UserInterface:
 							print "**** CHEATER!!! ****"
 						if self.chess.isCheck():
 							print "**** CHECK ****"
+						if self.chess.getTurn() == ChessBoard.WHITE:
+							print "White's turn"
+						else:
+							print "White's turn"
 						self.requestedMove = None
 						self.lastBoardscan = self.boardscan
 						self.chess.printBoard()
@@ -242,7 +251,9 @@ class UserInterface:
 
 	def renderBoard(self):
 
+		self.screen.blit(self.bgimage, (0,0))
 		if self.chess is None:
+			pygame.display.flip()
 			return
 			
 		files = 'abcdefgh'
@@ -251,10 +262,10 @@ class UserInterface:
 		square_size = self.pieces['r'].get_rect().w
 
 		# First the background
-		bgsize = self.bgimage.get_rect().w
+		bgsize = self.boardbg.get_rect().w
 		for y in range(4):
 			for x in range(4):
-				self.screen.blit(self.bgimage, (boardOffsetX+x*bgsize, boardOffsetY+y*bgsize))
+				self.screen.blit(self.boardbg, (boardOffsetX+x*bgsize, boardOffsetY+y*bgsize))
 
 		# Render the pieces
 		y = 0

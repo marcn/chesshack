@@ -46,7 +46,6 @@ class ChessCV():
 			print
 
 		classifier.markup_board(dst_img)
-		img_out.show(dst_img)
 
 		return numeric_classification_matrix
 

@@ -5,11 +5,13 @@ from ChessEngine import ChessEngine
 from board_processing import ChessCV
 from MockCV import MockCV
 
-import os, pygame, math, random, time, thread, sys
+import os, pygame, math, random, time, thread, sys, string
 import numpy as np
 from pygame.locals import *
 
 class UserInterface:
+
+	ROTATIONS_RIGHT = 1
 
 	STATE_WAITING_FOR_START_POS = 0
 	STATE_WAITING_FOR_BOARD_CHANGE = 1
@@ -33,7 +35,8 @@ class UserInterface:
 			self.cv = ChessCV()
 		self.cv.continuous = True
 		thread.start_new_thread(self.cvThread, (self,))
-		self.clearBoardScan()
+		self.boardscan = np.ndarray(shape=(8,8), dtype=np.int8)
+		self.boardscan.fill(0)
 		self.chess = None
 		self.boardScale = 1.5
 		self.considering = []
@@ -57,10 +60,6 @@ class UserInterface:
 		self.pieces['Q'] = self.loadImage("wq.png")
 		self.pieces['P'] = self.loadImage("wp.png")
 		pygame.display.flip()
-
-	def clearBoardScan(self):
-		self.boardscan = np.ndarray(shape=(8,8), dtype=np.int8)
-		self.boardscan.fill(0)
 
 	def loadImage(self, file):
 		img = pygame.image.load("./img/%s" % file).convert(32, pygame.SRCALPHA)
@@ -190,6 +189,9 @@ class UserInterface:
 					if result is False:
 						print "Could not make move: ", self.chess.getReason()
 					else:
+						lastMove = string.replace(self.chess.getLastTextMove(ChessBoard.AN), '-', '')
+						if self.requestedMove is not None and self.requestedMove != lastMove:
+							print "**** CHEATER!!! ****"
 						self.requestedMove = None
 						self.lastBoardscan = self.boardscan
 						self.chess.printBoard()
@@ -288,7 +290,9 @@ class UserInterface:
 						self.cv.snapshot = False
 						sys.stdout.write('.')
 						sys.stdout.flush()
-						self.boardscan = self.cv.current_board()
+						board = self.cv.current_board()
+						if board is not None:
+							self.boardscan = np.rot90(board, UserInterface.ROTATIONS_RIGHT)
 			except Exception, e:
 				print e
 			time.sleep(0.25)

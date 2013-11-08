@@ -31,7 +31,7 @@ class UserInterface:
 		self.considering = []
 		self.lastConsider = None
 		self.waitingForEngine = False
-		self.bgimage = self.loadImage("53.gif")
+		self.bgimage = self.loadImage("53.png")
 		self.pieces = {}
 		self.pieces['r'] = self.loadImage("br.png")
 		self.pieces['n'] = self.loadImage("bn.png")
@@ -85,6 +85,16 @@ class UserInterface:
 							[ 0, 0, 0, 0, 0, 0, 0, 0],
 							[ 1, 1, 1, 1, 0, 1, 1, 1],
 							[ 1, 1, 1, 1, 1, 1, 1, 1]], np.int8)
+					if event.key == 51:	# 3
+						self.boardscan = np.array(
+							[[-1,-1,-1,-1,-1,-1,-1,-1],
+							[-1,-1,-1, 0,-1,-1,-1,-1],
+							[ 0, 0, 0, 0, 0, 0, 0, 0],
+							[ 0, 0, 0,-1, 0, 0, 0, 0],
+							[ 0, 0, 0, 0, 1, 0, 0, 0],
+							[ 0, 0, 0, 0, 0, 0, 0, 0],
+							[ 1, 1, 1, 1, 0, 1, 1, 1],
+							[ 1, 1, 1, 1, 1, 1, 1, 1]], np.int8)
 			self.readBoard()
 
 
@@ -100,7 +110,8 @@ class UserInterface:
 			if self.waitingForEngine and self.engine.bestmove is not None:
 				self.waitingForEngine = False
 				self.considering = []
-				self.chess.addTextMove(self.engine.bestmove)
+				print "calling addTextMove with:", self.engine.bestmove
+				#self.chess.addTextMove(self.engine.bestmove)
 			self.renderBoard()
 		else:
 			if self.chess is None:

@@ -138,13 +138,16 @@ class UserInterface:
 						# BLACK's turn
 						if value == 1:
 							if numChanges != 4 or (change == (4,0)):
+								print "setting moveFrom to ", change
 								moveFrom = change
 						else:
 							if numChanges == 4:
 								if change == (6,0) or change == (2,0):
+									print "setting moveTo to ", change
 									moveTo = change
 							elif numChanges == 3:
 								if colorBefore == 0:
+									print "setting moveTo to ", change
 									moveTo = change
 							else:
 								moveTo = change
@@ -152,7 +155,7 @@ class UserInterface:
 				print "moveTo:   " + str(moveTo)
 				result = self.chess.addMove(moveFrom, moveTo)
 				if result is False:
-					print "Could not make move: " + int(self.chess.getReason())
+					print "Could not make move: ", self.chess.getReason()
 				self.chess.printBoard()
 				print "Last move type: " + str(self.chess.getLastMoveType())
 				self.renderBoard()

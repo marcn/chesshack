@@ -40,6 +40,7 @@ class UserInterface:
 		self.boardscan = np.ndarray(shape=(8,8), dtype=np.int8)
 		self.boardscan.fill(0)
 		self.chess = None
+		self.lastFullScreenToggle = 0
 		self.boardScale = 2
 		self.considering = []
 		self.lastConsider = None
@@ -49,6 +50,7 @@ class UserInterface:
 		#self.screen = pygame.display.set_mode((1824, 1016))
 		self.screen = pygame.display.set_mode((0,0), pygame.FULLSCREEN)
 		self.bgimage = pygame.image.load("./img/background.png")
+		self.would_you_like_to_play = pygame.image.load("./img/headings/would_you_like_to_play.png")
 		self.boardbg = self.loadImage("board.gif")
 		self.pieces = {}
 		self.pieces['r'] = self.loadImage("br.png")
@@ -87,6 +89,10 @@ class UserInterface:
 					print event.key
 					if event.key == K_ESCAPE:
 						return
+					if event.key == 102: # F
+						if time.time() - self.lastFullScreenToggle > 1:
+							self.lastFullScreenToggle = time.time() 
+							pygame.display.toggle_fullscreen()
 					if event.key == 32: # space
 						self.cv.snapshot = True
 					if event.key == 49:	# 1
@@ -253,6 +259,7 @@ class UserInterface:
 
 		self.screen.blit(self.bgimage, (0,0))
 		if self.chess is None:
+			self.screen.blit(self.would_you_like_to_play, (587, 395))
 			pygame.display.flip()
 			return
 			

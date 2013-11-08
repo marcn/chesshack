@@ -52,7 +52,7 @@ class UserInterface:
 		self.screen = pygame.display.set_mode((0,0), pygame.FULLSCREEN)
 
 		self.bgimage = pygame.image.load("./img/background.png")
-		self.light_sabers = pygame.image.load("./img/light_sabers.png")
+		self.light_sabers = pygame.image.load("./img/light_sabers2.png")
 		self.would_you_like_to_play = pygame.image.load("./img/headings/would_you_like_to_play.png")
 		self.checkmate_suckah = pygame.image.load("./img/headings/checkmate_suckah.png")
 		self.my_turn = pygame.image.load("./img/headings/my_turn.png")
@@ -67,7 +67,7 @@ class UserInterface:
 
 		self.topHeading = None
 		self.bottomHeading = None
-		self.boardbg = self.loadImage("board.gif")
+		self.boardbg = self.loadImage("board_v2.gif")
 		self.pieces = {}
 		self.pieces['r'] = self.loadImage("br.png")
 		self.pieces['n'] = self.loadImage("bn.png")
@@ -395,9 +395,9 @@ class UserInterface:
 				y1 = boardOffsetY+((8-int(move[1]))*square_size)+int(square_size/2)
 				x2 = boardOffsetX+files.find(move[2])*square_size+int(square_size/2)
 				y2 = boardOffsetY+((8-int(move[3]))*square_size)+int(square_size/2)
-				pygame.draw.line(self.screen, (0, 255, 0), (x1,y1), (x2,y2), 15)
-				pygame.draw.circle(self.screen, (255, 0, 0), (x1,y1), 15)
-				pygame.draw.circle(self.screen, (0, 0, 255), (x2,y2), 15)
+				pygame.draw.line(self.screen, (164, 119, 131), (x1,y1), (x2,y2), 15)
+				pygame.draw.circle(self.screen, (127, 91, 102), (x1,y1), 15)
+				pygame.draw.circle(self.screen, (127, 91, 102), (x2,y2), 15)
 
 		# Render requested move (if any)
 		if self.requestedMove is not None:
@@ -405,8 +405,8 @@ class UserInterface:
 			y1 = boardOffsetY+((8-int(self.requestedMove[1]))*square_size)+int(square_size/2)
 			x2 = boardOffsetX+files.find(self.requestedMove[2])*square_size+int(square_size/2)
 			y2 = boardOffsetY+((8-int(self.requestedMove[3]))*square_size)+int(square_size/2)
-			pygame.draw.line(self.screen, (255, 0, 0), (x1,y1), (x2,y2), 15)
-			pygame.draw.circle(self.screen, (255, 0, 0), (x2,y2), 15)
+			pygame.draw.line(self.screen, (229, 72, 84), (x1,y1), (x2,y2), 15)
+			pygame.draw.circle(self.screen, (173, 58, 75), (x2,y2), 15)
 			# Redraw piece on "from" square so line comes from underneath it (but covers other pieces, potentially)
 			y = 8-int(self.requestedMove[1])
 			x = files.find(self.requestedMove[0])

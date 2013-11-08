@@ -1,5 +1,5 @@
 import cv2, numpy as np, sys, time
-from utils import ImgOut, next_frame
+from utils import ImgOut, next_frame, comparison_frames
 from boardClassifier import BoardClassifier
 
 img_out = ImgOut()
@@ -31,43 +31,75 @@ class Timer():
 				diff = self._end_times[k] - self._start_times[k]
 			print "[%s]: %dms" % (k, int(diff * 1000))
 
+class Corners():
+
+	tl = None
+	tr = None
+	br = None
+	bl = None
+
+	def __init__(self, tl, tr, br, bl):
+		self.tl = tl
+		self.tr = tr
+		self.br = br
+		self.bl = bl
+
+	def to_array(self):
+		return [self.tl, self.tr, self.br, self.bl]
+
 class ChessCV():
 
 	def __init__(self, scale=1, file_name=None):
 		self.scale = scale
 		self.file_name = file_name
+		self.corners = None
+		self.classifier = BoardClassifier()
+		self.movement_fails = 0
 
 	def current_board(self):
+		if False and self.classifier.movement(comparison_frames()):
+			self.movement_fails += 1
+			if self.movement_fails > 4:
+				print "four consecutive movement fails -- attempting anyway"
+				self.movement_fails = 0
+			else:
+				return
+		else:
+			self.movement_fails = 0
+
 		self.image = cv2.imread(self.file_name) if self.file_name is not None else next_frame()
 		self.dimensions = (len(self.image[0]), len(self.image))
 
-		# find corners of board
-		dst_img = self.grayscale(self.image)
-		if self.scale != 1:
-			dst_img = self.resize(dst_img)
-		#dst_img = self.quantize(dst_img)
-		dst_img = cv2.GaussianBlur(dst_img, (5, 5), 0)
-		try:
-			dst_img_thresh = self.threshold(dst_img)
-			(tl, tr, br, bl) = self.find_corners(dst_img_thresh)
-		except IndexError:
-			(tl, tr, br, bl) = self.find_corners(dst_img)
+		if self.corners is None:
+			# find corners of board
+			dst_img = self.grayscale(self.image)
+			if self.scale != 1:
+				dst_img = self.resize(dst_img)
+			#dst_img = self.quantize(dst_img)
+			dst_img = cv2.GaussianBlur(dst_img, (5, 5), 0)
+			try:
+				dst_img_thresh = self.threshold(dst_img)
+				self.corners = self.find_corners(dst_img_thresh)
+			except IndexError:
+				self.corners = self.find_corners(dst_img)
 
 		# fix perspective
-		dst_img = self.warp_perspective(self.image, tl, tr, br, bl)
+		dst_img = self.warp_perspective(self.image)
 
 		# classify board
 		dst_img = cv2.cvtColor(dst_img, cv2.COLOR_BGR2GRAY)
-		classifier = BoardClassifier()
-		classification = classifier.make_classification_matrix(dst_img)
+		classification = self.classifier.make_classification_matrix(dst_img)
 		for i in range(0,8):
 			for j in range(0,8):
 				print classification[i][j],
 			print
 
-		numeric_classification_matrix = classifier.make_numeric_classification_matrix(classification)
+		numeric_classification_matrix = self.classifier.make_numeric_classification_matrix(classification)
 
 		return numeric_classification_matrix
+
+	def reset_board(self):
+		self.corners = None
 
 	def resize(self, img):
 		new_dimensions = (int(self.dimensions[0] * 0.5), int(self.dimensions[1] * 0.5))
@@ -125,12 +157,15 @@ class ChessCV():
 				elif point[1] > mean_point[1]:
 					br = point
 
-		return (tl, tr, br, bl)
+		return Corners(tl, tr, br, bl)
 
-	def warp_perspective(self, img, tl, tr, br, bl):
+	def warp_perspective(self, img):
 		x = lambda y: (y[0] / self.scale, y[1] / self.scale)
-		matrix = cv2.getPerspectiveTransform(np.array([x(tl), x(tr), x(br), x(bl)], np.float32), \
-											 np.array([[0, 0], [499, 0], [499, 499], [0, 499]], np.float32))
+
+		map_from = np.array([x(z) for z in self.corners.to_array()], np.float32)
+		map_to = np.array([[0, 0], [499, 0], [499, 499], [0, 499]], np.float32)
+
+		matrix = cv2.getPerspectiveTransform(map_from, map_to)
 		return cv2.warpPerspective(img, matrix, (500, 500))
 
 def test_variance():

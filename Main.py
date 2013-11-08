@@ -232,6 +232,7 @@ class UserInterface:
 							self.state = UserInterface.STATE_WAITING_FOR_ENGINE
 			elif numChanges != 0:
 				print "Invalid number of board changes: ", numChanges
+				self.cv.reset_board()
 			# Set boardscan to the last one just so we don't keep analyzing it until next scan comes in
 			self.boardscan = self.lastBoardscan
 			self.renderBoard()

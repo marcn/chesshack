@@ -52,6 +52,7 @@ class UserInterface:
 		self.screen = pygame.display.set_mode((0,0), pygame.FULLSCREEN)
 
 		self.bgimage = pygame.image.load("./img/background.png")
+		self.light_sabers = pygame.image.load("./img/light_sabers.png")
 		self.would_you_like_to_play = pygame.image.load("./img/headings/would_you_like_to_play.png")
 		self.checkmate_suckah = pygame.image.load("./img/headings/checkmate_suckah.png")
 		self.my_turn = pygame.image.load("./img/headings/my_turn.png")
@@ -305,7 +306,7 @@ class UserInterface:
 								print "**** WHITE WINS ****"
 							elif result == ChessBoard.BLACK_WIN:
 								print "**** BLACK WINS ****"
-								self.bottomHeading = self.self.checkmate_suckah
+								self.bottomHeading = self.checkmate_suckah
 							else:
 								print "**** STALEMATE ****"
 							self.state = UserInterface.STATE_GAME_OVER
@@ -331,7 +332,8 @@ class UserInterface:
 	def updateConsideringLine(self):
 		now = time.time()
 		engine_considering = self.engine.considering
-		if self.state == UserInterface.STATE_WAITING_FOR_ENGINE and engine_considering is not None and (self.lastConsider is None or (now - self.lastConsider > 0.1)):
+		#if self.state == UserInterface.STATE_WAITING_FOR_ENGINE and engine_considering is not None and (self.lastConsider is None or (now - self.lastConsider > 0.1)):
+		if self.state == UserInterface.STATE_WAITING_FOR_ENGINE and engine_considering is not None:
 			if len(self.engine.considering) > 0:
 				latest = engine_considering[0]
 				if len(latest) == 0:
@@ -342,6 +344,7 @@ class UserInterface:
 				self.considering.append(latest.pop())
 			self.lastConsider = now
 			self.dirtyUi = True
+			self.renderBoard()
 
 
 	def renderBoard(self):
@@ -381,6 +384,9 @@ class UserInterface:
 		# Heading
 		if self.topHeading is not None:
 			self.screen.blit(self.topHeading, (1105, 84))
+
+		# Sabers
+		self.screen.blit(self.light_sabers, (1105, 84 + 140))
 
 		# Render considering moves (if any)
 		if len(self.considering) > 0:

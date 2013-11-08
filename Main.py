@@ -45,12 +45,27 @@ class UserInterface:
 		self.considering = []
 		self.lastConsider = None
 		self.requestedMove = None
+		self.dirtyUi = True
 		pygame.init()
 		#self.screen = pygame.display.set_mode((800, 800))
 		#self.screen = pygame.display.set_mode((1824, 1016))
 		self.screen = pygame.display.set_mode((0,0), pygame.FULLSCREEN)
+
 		self.bgimage = pygame.image.load("./img/background.png")
 		self.would_you_like_to_play = pygame.image.load("./img/headings/would_you_like_to_play.png")
+		self.checkmate_suckah = pygame.image.load("./img/headings/checkmate_suckah.png")
+		self.my_turn = pygame.image.load("./img/headings/my_turn.png")
+		self.my_turn_move_piece = pygame.image.load("./img/headings/my_turn_move_piece.png")
+		self.one_moment_please = pygame.image.load("./img/headings/one_moment_please.png")
+		self.would_you_like_to_play = pygame.image.load("./img/headings/would_you_like_to_play.png")
+		self.your_turn = pygame.image.load("./img/headings/your_turn.png")
+		self.your_turn_cheater = pygame.image.load("./img/headings/your_turn_cheater.png")
+
+		self.check = pygame.image.load("./img/bottom_headers/check.png")
+		self.checkmate_suckah = pygame.image.load("./img/bottom_headers/checkmate_suckah.png")
+
+		self.topHeading = None
+		self.bottomHeading = None
 		self.boardbg = self.loadImage("board.gif")
 		self.pieces = {}
 		self.pieces['r'] = self.loadImage("br.png")
@@ -138,17 +153,83 @@ class UserInterface:
 				self.chess = ChessBoard()
 				self.lastBoardscan = self.boardscan
 				self.engine.newGame()
+				self.dirtyUi = True
+
+				'''
+				self.chess.addTextMove("e2e4")
+				self.chess.addTextMove("e7e6")
+				self.chess.addTextMove("d2d4")
+				self.chess.addTextMove("d7d5")
+				self.chess.addTextMove("b1c3")
+				self.chess.addTextMove("f8b4")
+				self.chess.addTextMove("e4e5")
+				self.chess.addTextMove("c7c5")
+				self.chess.addTextMove("a2a3")
+				self.chess.addTextMove("b4c3")
+				self.chess.addTextMove("b2c3")
+				self.chess.addTextMove("b8c6")
+				self.chess.addTextMove("g1f3")
+				self.chess.addTextMove("g8e7")
+				self.chess.addTextMove("f1e2")
+				self.chess.addTextMove("e8g8")
+				self.chess.addTextMove("e1g1")
+				self.chess.addTextMove("c5c4")
+				self.chess.addTextMove("a3a4")
+				self.chess.addTextMove("c8d7")
+				self.chess.addTextMove("c1a3")
+				self.chess.addTextMove("d8a5")
+				self.chess.addTextMove("a3b2")
+				self.chess.addTextMove("f7f6")
+				self.chess.addTextMove("d1d2")
+				self.chess.addTextMove("f6e5")
+				self.chess.addTextMove("d4e5")
+				self.chess.addTextMove("e7g6")
+				self.chess.addTextMove("d2g5")
+				self.chess.addTextMove("f8f5")
+				self.chess.addTextMove("g5e3")
+				self.chess.addTextMove("c6e5")
+				self.chess.addTextMove("f3g5")
+				self.chess.addTextMove("e5g4")
+				self.chess.addTextMove("e2g4")
+				self.chess.addTextMove("f5e5")
+				self.chess.addTextMove("e3d2")
+				self.chess.addTextMove("a8f8")
+				self.chess.addTextMove("f2f4")
+				self.chess.addTextMove("g6f4")
+				self.chess.addTextMove("f1f4")
+				self.chess.addTextMove("h7h6")
+				self.chess.addTextMove("g5f3")
+				self.chess.addTextMove("e5e4")
+				self.chess.addTextMove("g2g3")
+				self.chess.addTextMove("e6e5")
+				self.chess.addTextMove("f4f8")
+				self.chess.addTextMove("g8f8")
+				self.chess.addTextMove("g4d7")
+				self.chess.addTextMove("d5d4")
+				self.chess.addTextMove("c3d4")
+				self.chess.addTextMove("a5c7")
+				self.chess.addTextMove("f3e5")
+				self.chess.addTextMove("f8e7")
+				self.chess.addTextMove("b2a3")
+				self.chess.addTextMove("e7d8")
+				self.chess.addTextMove("a1f1")
+				self.chess.addTextMove("c7b6")
+				self.chess.addTextMove("f1f8")
+				'''
+
 				self.state = UserInterface.STATE_WAITING_FOR_BOARD_CHANGE
 		elif self.state == UserInterface.STATE_WAITING_FOR_ENGINE:
 			if self.engine.bestmove is not None:
 				self.requestedMove = self.engine.bestmove
 				self.considering = []
 				self.state = UserInterface.STATE_WAITING_FOR_BOARD_CHANGE
+				self.dirtyUi = True
 			self.renderBoard()
 		elif self.state == UserInterface.STATE_WAITING_FOR_BOARD_CHANGE:
 			changes = self.boardscan - self.lastBoardscan
 			numChanges = np.count_nonzero(changes)
 			if numChanges == 2 or numChanges == 3 or numChanges == 4:
+				self.dirtyUi = True
 				print ""
 				print "changes:\n" + str(changes)
 				moveFrom = ()
@@ -206,6 +287,10 @@ class UserInterface:
 							print "**** CHEATER!!! ****"
 						if self.chess.isCheck():
 							print "**** CHECK ****"
+							self.bottomHeading = self.self.check
+						else:
+							self.bottomHeading = None
+							self.bottomHeading = self.self.check
 						if self.chess.getTurn() == ChessBoard.WHITE:
 							print "White's turn"
 						else:
@@ -223,11 +308,13 @@ class UserInterface:
 								print "**** WHITE WINS ****"
 							elif result == ChessBoard.BLACK_WIN:
 								print "**** BLACK WINS ****"
+								self.bottomHeading = self.self.checkmate_suckah
 							else:
 								print "**** STALEMATE ****"
 							self.state = UserInterface.STATE_GAME_OVER
 						elif self.chess.getTurn() == ChessBoard.BLACK:
 							# It's not black's turn, engage the engine
+							self.topHeading = self.one_moment_please
 							self.engine.makeMove(self.chess.getFEN())
 							self.state = UserInterface.STATE_WAITING_FOR_ENGINE
 			elif numChanges != 0:
@@ -250,12 +337,15 @@ class UserInterface:
 					return
 				self.considering.append(latest.pop())
 			self.lastConsider = now
-
-	def displayMoveToMakeForComputer(self, move):
-		print "********* PLEASE MAKE MOVE: ", move
+			self.dirtyUi = True
 
 
 	def renderBoard(self):
+
+		if not self.dirtyUi:
+			return
+
+		self.dirtyUi = False
 
 		self.screen.blit(self.bgimage, (0,0))
 		if self.chess is None:
@@ -284,6 +374,10 @@ class UserInterface:
 				x += 1
 			y += 1
 
+		# Heading
+		if self.topHeading is not None:
+			self.screen.blit(self.topHeading, (1105, 84))
+
 		# Render considering moves (if any)
 		if len(self.considering) > 0:
 			for move in self.considering:
@@ -308,6 +402,42 @@ class UserInterface:
 			x = files.find(self.requestedMove[0])
 			piece = self.chess.getBoard()[y][x]
 			self.screen.blit(self.pieces[piece],(boardOffsetX+x*square_size, boardOffsetY+y*square_size))
+
+		# Top heading
+
+		# Bottom heading
+		if self.bottomHeading is not None:
+			self.screen.blit(self.bottomHeading, (1105, 84 + 140 + 165 + 403))
+
+		# Render chess moves
+		color = (255, 255, 255)
+		x = 1105
+		startY = 84 + 140 + 165
+		y = startY
+		font = self.getFont(20)
+		allMoves = self.chess.getAllTextMoves(ChessBoard.LAN)
+		if allMoves is not None:
+			whiteMoves = allMoves[0::2]
+			blackMoves = allMoves[1::2]
+			num = 1
+			for move in whiteMoves:
+				txt = "%d.  %s" % (num, move)
+				if num < 10:
+					txt = " " + txt
+				fs = font.render(txt, True, color)
+				self.screen.blit(fs, (x, y))
+				y += 25
+				num = num + 1
+				if y > startY + 403:
+					break
+			x += 200
+			y = startY
+			for move in blackMoves:
+				fs = font.render(move, True, color)
+				self.screen.blit(fs, (x, y))
+				y += 25
+				if y > startY + 403:
+					break
 
 
 		pygame.display.flip()

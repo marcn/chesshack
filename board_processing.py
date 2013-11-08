@@ -1,9 +1,35 @@
-import cv2, numpy as np, sys
-from timeit import Timer
+import cv2, numpy as np, sys, time
 from utils import ImgOut, next_frame
 from boardClassifier import BoardClassifier
 
 img_out = ImgOut()
+
+class Timer():
+	_start_times = {}
+	_end_times = {}
+	_last_key = None
+
+	# starts a key-bound timer
+	def start(self, key):
+		self._start_times[key] = time.time()
+		if self._last_key is not None:
+			self._end_times[self._last_key] = time.time()
+		self._last_key = key
+
+	# stops previously started timer
+	def clock(self):
+		if self._last_key is not None:
+			self._end_times[self._last_key] = time.time()
+		self._last_key = None
+
+	# stops all active timers and prints durations
+	def done(self):
+		for k in self._start_times:
+			if k not in self._end_times:
+				diff = time.time() - self._start_times[k]
+			else:
+				diff = self._end_times[k] - self._start_times[k]
+			print "[%s]: %dms" % (k, int(diff * 1000))
 
 class ChessCV():
 
@@ -12,25 +38,35 @@ class ChessCV():
 		self.file_name = file_name
 
 	def current_board(self):
+		timer = Timer()
+		timer.start("Image read")
 		self.image = cv2.imread(self.file_name) if self.file_name is not None else next_frame()
 		self.dimensions = (len(self.image[0]), len(self.image))
 
 		# find corners of board
+		timer.start("Grayscale")
 		dst_img = self.grayscale(self.image)
 		if self.scale != 1:
+			timer.start("Resize")
 			dst_img = self.resize(dst_img)
 		#dst_img = self.quantize(dst_img)
+		timer.start("Gaussian blur")
 		dst_img = cv2.GaussianBlur(dst_img, (5, 5), 0)
 		try:
+			timer.start("Threshold")
 			dst_img_thresh = self.threshold(dst_img)
+			timer.start("Find corners")
 			(tl, tr, br, bl) = self.find_corners(dst_img_thresh)
 		except IndexError:
+			timer.start("Find corners (2)")
 			(tl, tr, br, bl) = self.find_corners(dst_img)
 
 		# fix perspective
+		timer.start("Warp perspective")
 		dst_img = self.warp_perspective(self.image, tl, tr, br, bl)
 
 		# classify board
+		timer.start("Classify board")
 		dst_img = cv2.cvtColor(dst_img, cv2.COLOR_BGR2GRAY)
 		classifier = BoardClassifier()
 		classification = classifier.make_classification_matrix(dst_img)
@@ -45,8 +81,10 @@ class ChessCV():
 				print numeric_classification_matrix[i][j],
 			print
 
+		timer.start("Markup board")
 		classifier.markup_board(dst_img)
 
+		timer.done()
 		return numeric_classification_matrix
 
 	def resize(self, img):
@@ -78,8 +116,11 @@ class ChessCV():
 		#return cv2.threshold(img, 180, 255, cv2.THRESH_BINARY)[1]
 
 	def find_corners(self, img):
+		timer = Timer()
+		timer.start("Find Contours")
 		contours, hierarchy = cv2.findContours(img, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
 
+		timer.start("Find Largest")
 		best_match = (None, 0)
 		for contour in contours:
 			area = cv2.contourArea(contour)
@@ -89,12 +130,16 @@ class ChessCV():
 				if area > best_match[1] and len(approx) == 4:
 					best_match = (contour, area)
 
+		timer.start("Bounding box")
 		(tl, br), (tr, bl) = self.bounding_box(best_match[0])
+
+		timer.start("Nearest points * 4")
 		tl = self.find_nearest_point(tl, best_match[0])
 		br = self.find_nearest_point(br, best_match[0])
 		tr = self.find_nearest_point(tr, best_match[0])
 		bl = self.find_nearest_point(bl, best_match[0])
 
+		timer.done()
 		return (tl, tr, br, bl)
 
 	def find_nearest_point(self, pt, pts):
@@ -159,11 +204,11 @@ if __name__ == "__main__":
 	if len(sys.argv) > 1:
 		if sys.argv[1] == "test":
 			#ChessCV(scale=1, file_name='board-pictures/test-variance.jpg')
-			#ChessCV(scale=1, file_name='board-pictures/640-480/1.jpg')
+			ChessCV(scale=1, file_name='board-pictures/640-480/1.jpg').current_board()
 			#ChessCV(scale=1, file_name='board-pictures/640-480/2.jpg')
 			#ChessCV(scale=1, file_name='board-pictures/640-480/3.jpg')
 			#ChessCV(scale=1, file_name='board-pictures/640-480/4.jpg')
-			test_variance()
+			#test_variance()
 		elif sys.argv[1] == "camera":
 			while True:
 				cv2.imshow('win1', next_frame())

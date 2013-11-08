@@ -1,4 +1,4 @@
-#/usr/bin/env python
+#!/usr/bin/env python
 
 from ChessBoard import ChessBoard
 
@@ -7,7 +7,7 @@ from pygame.locals import *
 
 from pprint import pprint
 
-class ChessClient:
+class SampleChessClient:
 
     def mainLoop(self):    
         pygame.init()    
@@ -152,7 +152,7 @@ class ChessClient:
             pygame.display.flip()        
 
 def main():
-    g = ChessClient()
+    g = SampleChessClient()
     g.mainLoop()
 
  

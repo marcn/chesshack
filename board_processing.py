@@ -1,6 +1,6 @@
 import cv2, numpy as np, sys, time
 from utils import ImgOut, next_frame, comparison_frames
-from Motion.boardClassifier import BoardClassifier
+from boardClassifier import BoardClassifier
 
 img_out = ImgOut()
 

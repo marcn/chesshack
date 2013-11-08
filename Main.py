@@ -27,8 +27,10 @@ class UserInterface:
 			[ 0, 0, 0, 0, 0, 0, 0, 0],
 			[ 1, 1, 1, 1, 1, 1, 1, 1],
 			[ 1, 1, 1, 1, 1, 1, 1, 1]], np.int8)
-		#self.cv = ChessCV()
-		self.cv = MockCV()
+		if sys.platform == 'darwin':
+			self.cv = MockCV()
+		else:
+			self.cv = ChessCV()
 		self.cv.continuous = True
 		thread.start_new_thread(self.cvThread, (self,))
 		self.clearBoardScan()

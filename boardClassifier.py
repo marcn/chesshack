@@ -99,7 +99,7 @@ class BoardClassifier:
             for j in range(0,8) :
 	        gs = squares[j][i]
                 gsfloat = gs.astype(np.float)
-	        stdv = this.compute_stdv(gsfloat[8:-8,8:-8])
+	        stdv = this.compute_stdv(gsfloat[16:-16,16:-16])
                 mean = this.compute_mean(gsfloat)
                 color = this.color(i, j)
                 classification[i][j] = this.classify(color, mean, stdv, gsfloat)

@@ -63,7 +63,7 @@ class ChessCV():
 
 		# fix perspective
 		timer.start("Warp perspective")
-		dst_img = img_out.show(self.warp_perspective(self.image, tl, tr, br, bl))
+		dst_img = self.warp_perspective(self.image, tl, tr, br, bl)
 
 		# classify board
 		timer.start("Classify board")

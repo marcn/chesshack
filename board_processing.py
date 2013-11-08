@@ -168,8 +168,6 @@ if __name__ == "__main__":
 		elif sys.argv[1] == "camera":
 			while True:
 				cv2.imshow('win1', next_frame())
-				cv2.moveWindow('win1', 100, 100)
 				cv2.waitKey(0)
-
 	else:
 		ChessCV().current_board()

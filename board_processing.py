@@ -8,9 +8,13 @@ img_out = ImgOut()
 class ChessCV():
 
 	def __init__(self, scale=1, file_name=None):
-		self.image = cv2.imread(file_name) if file_name is not None else next_frame()
-		self.dimensions = (len(self.image[0]), len(self.image))
 		self.scale = scale
+		if file_name is not None:
+			self.file_name = file_name
+
+	def current_board(self):
+		self.image = cv2.imread(self.file_name) if self.file_name is not None else next_frame()
+		self.dimensions = (len(self.image[0]), len(self.image))
 
 		# find corners of board
 		dst_img = self.grayscale(self.image)
@@ -44,6 +48,8 @@ class ChessCV():
 
 		classifier.markup_board(dst_img)
 		img_out.show(dst_img)
+
+		return numeric_classification_matrix
 
 	def resize(self, img):
 		new_dimensions = (int(self.dimensions[0] * 0.5), int(self.dimensions[1] * 0.5))
@@ -152,12 +158,16 @@ def test_variance():
 	img_out.show(dst_img)
 
 if __name__ == "__main__":
-	if len(sys.argv) > 1 and sys.argv[1] == "test":
-		#ChessCV(scale=1, file_name='board-pictures/test-variance.jpg')
-		#ChessCV(scale=1, file_name='board-pictures/640-480/1.jpg')
-		#ChessCV(scale=1, file_name='board-pictures/640-480/2.jpg')
-		#ChessCV(scale=1, file_name='board-pictures/640-480/3.jpg')
-		#ChessCV(scale=1, file_name='board-pictures/640-480/4.jpg')
-		test_variance()
+	if len(sys.argv) > 1:
+		if sys.argv[1] == "test":
+			#ChessCV(scale=1, file_name='board-pictures/test-variance.jpg')
+			#ChessCV(scale=1, file_name='board-pictures/640-480/1.jpg')
+			#ChessCV(scale=1, file_name='board-pictures/640-480/2.jpg')
+			#ChessCV(scale=1, file_name='board-pictures/640-480/3.jpg')
+			#ChessCV(scale=1, file_name='board-pictures/640-480/4.jpg')
+			test_variance()
+		elif sys.argv[1] == "camera":
+			while True:
+				img_out.show(next_frame())
 	else:
-		ChessCV()
+		ChessCV().current_board()

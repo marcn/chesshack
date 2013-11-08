@@ -34,7 +34,7 @@ def main(argv):
     cv2.waitKey(0);
 
 class BoardClassifier:
-    def markup_board(this, board) :
+    def markup_board(self, board) :
         cv2.line(board, (0,0), (xl,yt), (0,255,0),5)
         cv2.line(board, (0,500), (xl,yb), (0,255,0),5)
         cv2.line(board, (500,0), (xr,yt), (0,255,0),5)
@@ -46,36 +46,36 @@ class BoardClassifier:
             y = int(yt + (i/8.0) * (yb - yt))
             cv2.line(board, (xl, y), (xr, y), (0,255,0), 3)
 
-    def make_squares(this, board) :
+    def make_squares(self, board) :
         squares = [[None for _ in range(8)] for _ in range(8)]
         for i in range(0,8):
             for j in range(0,8):
-                square = this.get_square(board, i, j)
+                square = self.get_square(board, i, j)
                 squares[i][j] = square
         return squares
     
     
-    def get_square(this, board, i, j):
+    def get_square(self, board, i, j):
         x = int(xl + (i/8.0) * (xr - xl))
         y = int(yt + (j/8.0) * (yb - yt))
         square = board [ y + 3 : -3 + y+(yb-yt)/8:1, x+3 : -3 + x+(xr - xl)/8:1 ]
         return square
     
-    def compute_stdv(this, square) :
+    def compute_stdv(self, square) :
         return np.std(square)
 
-    def compute_mean(this, square) :
+    def compute_mean(self, square) :
         return np.mean(square)
 
-    def color(this, i, j) :
+    def color(self, i, j) :
         c = ((j % 2) + i) % 2
         if 0 == c:
             return "white"
         return "black"
 
-    def classify(this, color, mean, stdv, square):
-	mean_full = this.compute_mean(square)
-        mean_middle = this.compute_mean(square[8:-8,8:-8])
+    def classify(self, color, mean, stdv, square):
+	mean_full = self.compute_mean(square)
+        mean_middle = self.compute_mean(square[8:-8,8:-8])
         # print mean_full, mean_middle
         if stdv > 5:
             if color == "white" :
@@ -92,20 +92,20 @@ class BoardClassifier:
 	    #return color + " unoccupied"
             return "X"
 
-    def make_classification_matrix(this, board):
+    def make_classification_matrix(self, board):
         classification = [[None for _ in range(8)] for _ in range(8)]
-        squares = this.make_squares(board)
+        squares = self.make_squares(board)
         for i in range(0,8) :
             for j in range(0,8) :
 	        gs = squares[j][i]
                 gsfloat = gs.astype(np.float)
-	        stdv = this.compute_stdv(gsfloat[16:-16,16:-16])
-                mean = this.compute_mean(gsfloat)
-                color = this.color(i, j)
-                classification[i][j] = this.classify(color, mean, stdv, gsfloat)
+	        stdv = self.compute_stdv(gsfloat[6:-6,6:-6])
+                mean = self.compute_mean(gsfloat)
+                color = self.color(i, j)
+                classification[i][j] = self.classify(color, mean, stdv, gsfloat)
         return classification
 
-    def make_numeric_classification_matrix(this, classification_matrix):
+    def make_numeric_classification_matrix(self, classification_matrix):
         numeric_classification_matrix = [[None for _ in range(8)] for _ in range(8)]
         for i in range(0,8) :
             for j in range(0,8) :

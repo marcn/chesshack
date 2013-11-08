@@ -1,6 +1,6 @@
 import cv2, numpy as np, sys, time
 from utils import ImgOut, next_frame, comparison_frames
-from boardClassifier import BoardClassifier
+from Motion.boardClassifier import BoardClassifier
 
 img_out = ImgOut()
 
@@ -57,7 +57,8 @@ class ChessCV():
 		self.movement_fails = 0
 
 	def current_board(self):
-		if False and self.classifier.movement(comparison_frames()):
+		frames = comparison_frames()
+		if False and self.classifier.compare_images_for_movement(frames[0], frames[1]):
 			self.movement_fails += 1
 			if self.movement_fails > 4:
 				print "four consecutive movement fails -- attempting anyway"

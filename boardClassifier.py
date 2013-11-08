@@ -117,7 +117,12 @@ class BoardClassifier:
                     numeric_classification_matrix[i][j] = 0;
         return np.array(numeric_classification_matrix, np.int8)
                     
-        
+    def compare_images_for_movement(rgbimage1, rgbimage2) :
+        (rgbimage1b, rgbimage1g, rgbimage1r) = cv2.split(rgbimage1)
+        val1 = np.mean(abs(rgbimage1r.astype(np.float)))
+        (rgbimage2b, rgbimage2g, rgbimage2r) = cv2.split(rgbimage2)
+        val2 = np.mean(abs(rgbimage2r.astype(np.float)))
+        return (val2 - val1) > 2;
 
 if __name__ == "__main__":
    main(sys.argv[1:])

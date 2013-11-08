@@ -3,14 +3,20 @@
 from ChessBoard import ChessBoard
 from ChessEngine import ChessEngine
 from board_processing import ChessCV
+from MockCV import MockCV
 
-import os, pygame, math, random, time
+import os, pygame, math, random, time, thread, sys
 import numpy as np
 from pygame.locals import *
 
 class UserInterface:
 
+	STATE_WAITING_FOR_START_POS = 0
+	STATE_WAITING_FOR_BOARD_CHANGE = 1
+	STATE_WAITING_FOR_ENGINE = 2
+
 	def __init__(self):
+		self.state = UserInterface.STATE_WAITING_FOR_START_POS
 		self.engine = ChessEngine()
 		self.startingPos = np.array(
 			[[-1,-1,-1,-1,-1,-1,-1,-1],
@@ -21,16 +27,17 @@ class UserInterface:
 			[ 0, 0, 0, 0, 0, 0, 0, 0],
 			[ 1, 1, 1, 1, 1, 1, 1, 1],
 			[ 1, 1, 1, 1, 1, 1, 1, 1]], np.int8)
-
-		# Eventually self.boardscan will be set by the CV code, just mocked for now
 		self.cv = ChessCV()
+		#self.cv = MockCV()
+		self.cv.continuous = True
+		thread.start_new_thread(self.cvThread, (self,))
 		self.boardscan = np.ndarray(shape=(8,8), dtype=np.int8)
 		self.boardscan.fill(0)
 		self.chess = None
 		self.boardScale = 1.5
 		self.considering = []
 		self.lastConsider = None
-		self.waitingForEngine = False
+		self.requestedMove = None
 		self.screen = pygame.display.set_mode((800, 800))
 		#self.screen = pygame.display.set_mode((1824, 1016))
 		#self.screen = pygame.display.set_mode((0,0), pygame.FULLSCREEN)
@@ -62,7 +69,6 @@ class UserInterface:
 
 		while 1:
 			clock.tick(30)
-			#self.renderBoard()
 
 			for event in pygame.event.get():
 				if event.type == QUIT:
@@ -72,11 +78,11 @@ class UserInterface:
 					if event.key == K_ESCAPE:
 						return
 					if event.key == 32: # space
-						self.boardscan = self.cv.current_board()
+						self.cv.snapshot = True
 					if event.key == 49:	# 1
-						self.boardscan = self.startingPos.copy()
+						self.cv.set_board(self.startingPos.copy())
 					if event.key == 50:	# 2
-						self.boardscan = np.array(
+						self.cv.set_board(np.array(
 							[[-1,-1,-1,-1,-1,-1,-1,-1],
 							[-1,-1,-1,-1,-1,-1,-1,-1],
 							[ 0, 0, 0, 0, 0, 0, 0, 0],
@@ -84,9 +90,9 @@ class UserInterface:
 							[ 0, 0, 0, 0, 1, 0, 0, 0],
 							[ 0, 0, 0, 0, 0, 0, 0, 0],
 							[ 1, 1, 1, 1, 0, 1, 1, 1],
-							[ 1, 1, 1, 1, 1, 1, 1, 1]], np.int8)
+							[ 1, 1, 1, 1, 1, 1, 1, 1]], np.int8))
 					if event.key == 51:	# 3
-						self.boardscan = np.array(
+						self.cv.set_board(np.array(
 							[[-1,-1,-1,-1,-1,-1,-1,-1],
 							[-1,-1,-1, 0,-1,-1,-1,-1],
 							[ 0, 0, 0, 0, 0, 0, 0, 0],
@@ -94,32 +100,40 @@ class UserInterface:
 							[ 0, 0, 0, 0, 1, 0, 0, 0],
 							[ 0, 0, 0, 0, 0, 0, 0, 0],
 							[ 1, 1, 1, 1, 0, 1, 1, 1],
-							[ 1, 1, 1, 1, 1, 1, 1, 1]], np.int8)
-			self.readBoard()
+							[ 1, 1, 1, 1, 1, 1, 1, 1]], np.int8))
+					if event.key == 52:	# 4
+						self.cv.set_board(np.array(
+							[[-1,-1,-1,-1,-1,-1,-1,-1],
+							[-1,-1,-1, 0,-1,-1,-1,-1],
+							[ 0, 0, 0, 0, 0, 0, 0, 0],
+							[ 0, 0, 0, 1, 0, 0, 0, 0],
+							[ 0, 0, 0, 0, 0, 0, 0, 0],
+							[ 0, 0, 0, 0, 0, 0, 0, 0],
+							[ 1, 1, 1, 1, 0, 1, 1, 1],
+							[ 1, 1, 1, 1, 1, 1, 1, 1]], np.int8))
+			self.gameTick()
 
 
-	def readBoard(self):
+	def gameTick(self):
 		self.updateConsideringLine()
-		if np.array_equal(self.boardscan, self.startingPos) and self.chess is None:
-			print "creating chess board"
-			self.chess = ChessBoard()
-			self.lastBoardscan = self.boardscan
-			self.engine.newGame()
-		elif self.chess is not None and self.chess.getTurn() == ChessBoard.BLACK:
-			print "self.engine.bestmove = " + str(self.engine.bestmove)
-			if self.waitingForEngine and self.engine.bestmove is not None:
-				self.waitingForEngine = False
+		if self.state == UserInterface.STATE_WAITING_FOR_START_POS:
+			if np.array_equal(self.boardscan, self.startingPos):
+				print "NEW GAME: Creating chess board"
+				self.chess = ChessBoard()
+				self.lastBoardscan = self.boardscan
+				self.engine.newGame()
+				self.state = UserInterface.STATE_WAITING_FOR_BOARD_CHANGE
+		elif self.state == UserInterface.STATE_WAITING_FOR_ENGINE:
+			if self.engine.bestmove is not None:
+				self.requestedMove = self.engine.bestmove
 				self.considering = []
-				print "calling addTextMove with:", self.engine.bestmove
-				#self.chess.addTextMove(self.engine.bestmove)
+				self.state = UserInterface.STATE_WAITING_FOR_BOARD_CHANGE
 			self.renderBoard()
-		else:
-			if self.chess is None:
-				self.showWaitingForGameToStart()
-				return
+		elif self.state == UserInterface.STATE_WAITING_FOR_BOARD_CHANGE:
 			changes = self.boardscan - self.lastBoardscan
 			numChanges = np.count_nonzero(changes)
 			if numChanges > 0:
+				print ""
 				print "changes:\n" + str(changes)
 				moveFrom = ()
 				moveTo = ()
@@ -169,20 +183,24 @@ class UserInterface:
 				print "getTurn after:", self.chess.getTurn()
 				if result is False:
 					print "Could not make move: ", self.chess.getReason()
-				self.chess.printBoard()
-				print "Last move type: " + str(self.chess.getLastMoveType())
-				self.renderBoard()
-				print "New FEN: " + self.chess.getFEN()
-				self.waitingForEngine = True
-				self.engine.makeMove(self.chess.getFEN())
-			self.lastBoardscan = self.boardscan
+				else:
+					self.requestedMove = None
+					self.lastBoardscan = self.boardscan
+					self.chess.printBoard()
+					print "Last move type: " + str(self.chess.getLastMoveType())
+					self.renderBoard()
+					print "New FEN: " + self.chess.getFEN()
+					if self.chess.getTurn() == ChessBoard.BLACK:
+						# It's not black's turn, engage the engine
+						self.engine.makeMove(self.chess.getFEN())
+						self.state = UserInterface.STATE_WAITING_FOR_ENGINE
 			self.renderBoard()
 
 
 	def updateConsideringLine(self):
 		now = time.time()
 		engine_considering = self.engine.considering
-		if self.waitingForEngine and engine_considering is not None and (self.lastConsider is None or (now - self.lastConsider > 0.1)):
+		if self.state == UserInterface.STATE_WAITING_FOR_ENGINE and engine_considering is not None and (self.lastConsider is None or (now - self.lastConsider > 0.1)):
 			if len(self.engine.considering) > 0:
 				latest = engine_considering[0]
 				if len(latest) == 0:
@@ -193,16 +211,19 @@ class UserInterface:
 				self.considering.append(latest.pop())
 			self.lastConsider = now
 
-	def showWaitingForGameToStart(self):
-		pass
+	def displayMoveToMakeForComputer(self, move):
+		print "********* PLEASE MAKE MOVE: ", move
+
 
 	def renderBoard(self):
 
 		if self.chess is None:
 			return
 			
+		files = 'abcdefgh'
 		boardOffsetX = 64
 		boardOffsetY = 64
+		square_size = self.pieces['r'].get_rect().w
 
 		# First the background
 		bgsize = self.bgimage.get_rect().w
@@ -212,11 +233,9 @@ class UserInterface:
 
 		# Render the pieces
 		y = 0
-		square_size = self.pieces['r'].get_rect().w
 		for rank in self.chess.getBoard():
 			x = 0
 			for p in rank:
-				#p = random.choice(('.','.','.','.','r','n','b','k','q','p','R','N','B','K','K','Q','P'))
 				if p != '.':
 					self.screen.blit(self.pieces[p],(boardOffsetX+x*square_size, boardOffsetY+y*square_size))
 				x += 1
@@ -224,7 +243,6 @@ class UserInterface:
 
 		# Render considering moves (if any)
 		if len(self.considering) > 0:
-			files = 'abcdefgh'
 			for move in self.considering:
 				x1 = boardOffsetX+files.find(move[0])*square_size+int(square_size/2)
 				y1 = boardOffsetY+((8-int(move[1]))*square_size)+int(square_size/2)
@@ -234,10 +252,33 @@ class UserInterface:
 				pygame.draw.circle(self.screen, (255, 0, 0), (x1,y1), 15)
 				pygame.draw.circle(self.screen, (0, 0, 255), (x2,y2), 15)
 
+		# Render requested move (if any)
+		if self.requestedMove is not None:
+			x1 = boardOffsetX+files.find(self.requestedMove[0])*square_size+int(square_size/2)
+			y1 = boardOffsetY+((8-int(self.requestedMove[1]))*square_size)+int(square_size/2)
+			x2 = boardOffsetX+files.find(self.requestedMove[2])*square_size+int(square_size/2)
+			y2 = boardOffsetY+((8-int(self.requestedMove[3]))*square_size)+int(square_size/2)
+			pygame.draw.line(self.screen, (255, 0, 0), (x1,y1), (x2,y2), 15)
+			pygame.draw.circle(self.screen, (255, 0, 0), (x2,y2), 15)
+			# Redraw piece on "from" square so line comes from underneath it (but covers other pieces, potentially)
+			y = 8-int(self.requestedMove[1])
+			x = files.find(self.requestedMove[0])
+			piece = self.chess.getBoard()[y][x]
+			self.screen.blit(self.pieces[piece],(boardOffsetX+x*square_size, boardOffsetY+y*square_size))
+
 
 		pygame.display.flip()
 
 				
+	def cvThread(self, cv):
+		while True:
+			if self.state == UserInterface.STATE_WAITING_FOR_BOARD_CHANGE or self.state == UserInterface.STATE_WAITING_FOR_START_POS:
+				if self.cv.continuous == True or self.cv.snapshot == True:
+					self.cv.snapshot = False
+					sys.stdout.write('.')
+					sys.stdout.flush()
+					self.boardscan = self.cv.current_board()
+			time.sleep(0.25)
 
 
 def main():

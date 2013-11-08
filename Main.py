@@ -178,22 +178,23 @@ class UserInterface:
 								moveTo = change
 				print "moveFrom: " + str(moveFrom)
 				print "moveTo:   " + str(moveTo)
-				print "getTurn before:", self.chess.getTurn()
-				result = self.chess.addMove(moveFrom, moveTo)
-				print "getTurn after:", self.chess.getTurn()
-				if result is False:
-					print "Could not make move: ", self.chess.getReason()
-				else:
-					self.requestedMove = None
-					self.lastBoardscan = self.boardscan
-					self.chess.printBoard()
-					print "Last move type: " + str(self.chess.getLastMoveType())
-					self.renderBoard()
-					print "New FEN: " + self.chess.getFEN()
-					if self.chess.getTurn() == ChessBoard.BLACK:
-						# It's not black's turn, engage the engine
-						self.engine.makeMove(self.chess.getFEN())
-						self.state = UserInterface.STATE_WAITING_FOR_ENGINE
+				if moveFrom and moveTo:
+					print "getTurn before:", self.chess.getTurn()
+					result = self.chess.addMove(moveFrom, moveTo)
+					print "getTurn after:", self.chess.getTurn()
+					if result is False:
+						print "Could not make move: ", self.chess.getReason()
+					else:
+						self.requestedMove = None
+						self.lastBoardscan = self.boardscan
+						self.chess.printBoard()
+						print "Last move type: " + str(self.chess.getLastMoveType())
+						self.renderBoard()
+						print "New FEN: " + self.chess.getFEN()
+						if self.chess.getTurn() == ChessBoard.BLACK:
+							# It's not black's turn, engage the engine
+							self.engine.makeMove(self.chess.getFEN())
+							self.state = UserInterface.STATE_WAITING_FOR_ENGINE
 			self.renderBoard()
 
 

@@ -153,6 +153,7 @@ class UserInterface:
 				self.chess = ChessBoard()
 				self.lastBoardscan = self.boardscan
 				self.engine.newGame()
+				self.topHeading = self.your_turn
 				self.dirtyUi = True
 
 				'''
@@ -223,6 +224,7 @@ class UserInterface:
 				self.requestedMove = self.engine.bestmove
 				self.considering = []
 				self.state = UserInterface.STATE_WAITING_FOR_BOARD_CHANGE
+				self.topHeading = self.my_turn_move_piece
 				self.dirtyUi = True
 			self.renderBoard()
 		elif self.state == UserInterface.STATE_WAITING_FOR_BOARD_CHANGE:
@@ -283,23 +285,18 @@ class UserInterface:
 						print "Could not make move: ", self.chess.getReason()
 					else:
 						lastMove = string.replace(self.chess.getLastTextMove(ChessBoard.AN), '-', '')
+						cheater = False
 						if self.requestedMove is not None and self.requestedMove != lastMove:
-							print "**** CHEATER!!! ****"
+							cheater = True
 						if self.chess.isCheck():
 							print "**** CHECK ****"
 							self.bottomHeading = self.check
 						else:
 							self.bottomHeading = None
-							self.bottomHeading = self.check
-						if self.chess.getTurn() == ChessBoard.WHITE:
-							print "White's turn"
-						else:
-							print "White's turn"
 						self.requestedMove = None
 						self.lastBoardscan = self.boardscan
 						self.chess.printBoard()
 						print "Last move type: " + str(self.chess.getLastMoveType())
-						self.renderBoard()
 						print "New FEN: " + self.chess.getFEN()
 						# Check if game is over
 						if self.chess.isGameOver():
@@ -313,10 +310,17 @@ class UserInterface:
 								print "**** STALEMATE ****"
 							self.state = UserInterface.STATE_GAME_OVER
 						elif self.chess.getTurn() == ChessBoard.BLACK:
-							# It's not black's turn, engage the engine
+							# It's black's turn, engage the engine
 							self.topHeading = self.one_moment_please
 							self.engine.makeMove(self.chess.getFEN())
 							self.state = UserInterface.STATE_WAITING_FOR_ENGINE
+						else:
+							if cheater:
+								self.topHeading = self.your_turn_cheater
+							else:
+								self.topHeading = self.your_turn
+						self.renderBoard()
+
 			elif numChanges != 0:
 				print "Invalid number of board changes: ", numChanges
 			# Set boardscan to the last one just so we don't keep analyzing it until next scan comes in

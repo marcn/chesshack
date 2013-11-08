@@ -117,7 +117,7 @@ class BoardClassifier:
                     numeric_classification_matrix[i][j] = 0;
         return np.array(numeric_classification_matrix, np.int8)
                     
-    def compare_images_for_movement(rgbimage1, rgbimage2) :
+    def compare_images_for_movement(self, rgbimage1, rgbimage2) :
         (rgbimage1b, rgbimage1g, rgbimage1r) = cv2.split(rgbimage1)
         val1 = np.mean(abs(rgbimage1r.astype(np.float)))
         (rgbimage2b, rgbimage2g, rgbimage2r) = cv2.split(rgbimage2)

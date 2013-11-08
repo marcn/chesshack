@@ -7,7 +7,7 @@ class ChessEngine:
 	def __init__(self):
 		self.bestmove = None
 		self.considering = []
-		path = r'/usr/local/bin/stockfish'.split()['linux' in sys.platform]
+		path = r'/usr/local/bin/stockfish'
 		self.pipe = subprocess.Popen(path, stdin=subprocess.PIPE, stdout=subprocess.PIPE, bufsize=1, universal_newlines=True)
 		self.pipe.stdout.readline()	# Chess engine identifies itself, we just ignore
 		self.pipe.stdin.write('uci\n')		# UCI mode

@@ -45,9 +45,9 @@ class UserInterface:
 		self.pieces['K'] = self.loadImage("wk.png")
 		self.pieces['Q'] = self.loadImage("wq.png")
 		self.pieces['P'] = self.loadImage("wp.png")
-		self.screen = pygame.display.set_mode((800, 800))
+		#self.screen = pygame.display.set_mode((800, 800))
 		#self.screen = pygame.display.set_mode((1824, 1016))
-		#self.screen = pygame.display.set_mode((0,0), pygame.FULLSCREEN)
+		self.screen = pygame.display.set_mode((0,0), pygame.FULLSCREEN)
 		pygame.display.flip()
 
 	def loadImage(self, file):

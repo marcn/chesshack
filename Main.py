@@ -2,7 +2,7 @@
 
 from ChessBoard import ChessBoard
 from ChessEngine import ChessEngine
-from board_processor import ChessCV
+from board_processing import ChessCV
 
 import os, pygame, math, random, time
 import numpy as np
@@ -53,7 +53,7 @@ class UserInterface:
 	def loadImage(self, file):
 		img = pygame.image.load("./img/%s" % file)
 		rect = img.get_rect()
-		return pygame.transform.smoothscale(img, (int(rect.w * self.boardScale), int(rect.h * self.boardScale)))
+		return pygame.transform.scale(img, (int(rect.w * self.boardScale), int(rect.h * self.boardScale)))
 
 	def mainLoop(self):    
 		pygame.init()

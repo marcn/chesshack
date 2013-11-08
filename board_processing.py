@@ -28,6 +28,7 @@ class ChessCV():
 		dst_img = self.warp_perspective(self.image, tl, tr, br, bl)
 
 		# classify board
+		dst_img = cv2.cvtColor(dst_img, cv2.COLOR_BGR2GRAY)
 		classifier = BoardClassifier()
 		classification = classifier.make_classification_matrix(dst_img)
 		for i in range(0,8):
@@ -130,12 +131,33 @@ class ChessCV():
 				br = (br[0], y)
 		return ((tl, br), (tr, bl))
 
+def test_variance():
+	dst_img = cv2.imread('board-pictures/test-variance.jpg')
+	dst_img = cv2.cvtColor(dst_img, cv2.COLOR_BGR2GRAY)
+	# classify board
+	classifier = BoardClassifier()
+	classification = classifier.make_classification_matrix(dst_img)
+	for i in range(0,8):
+		for j in range(0,8):
+			print classification[i][j],
+		print
+
+	numeric_classification_matrix = classifier.make_numeric_classification_matrix(classification)
+	for i in range(0,8):
+		for j in range(0,8):
+			print numeric_classification_matrix[i][j],
+		print
+
+	classifier.markup_board(dst_img)
+	img_out.show(dst_img)
+
 if __name__ == "__main__":
 	if len(sys.argv) > 1 and sys.argv[1] == "test":
-		ChessCV(scale=1, file_name='board-pictures/640-480/0.jpg')
-		ChessCV(scale=1, file_name='board-pictures/640-480/1.jpg')
-		ChessCV(scale=1, file_name='board-pictures/640-480/2.jpg')
-		ChessCV(scale=1, file_name='board-pictures/640-480/3.jpg')
-		ChessCV(scale=1, file_name='board-pictures/640-480/4.jpg')
+		#ChessCV(scale=1, file_name='board-pictures/test-variance.jpg')
+		#ChessCV(scale=1, file_name='board-pictures/640-480/1.jpg')
+		#ChessCV(scale=1, file_name='board-pictures/640-480/2.jpg')
+		#ChessCV(scale=1, file_name='board-pictures/640-480/3.jpg')
+		#ChessCV(scale=1, file_name='board-pictures/640-480/4.jpg')
+		test_variance()
 	else:
 		ChessCV()

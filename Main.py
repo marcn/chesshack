@@ -46,8 +46,8 @@ class UserInterface:
 		self.requestedMove = None
 		pygame.init()
 		#self.screen = pygame.display.set_mode((800, 800))
-		self.screen = pygame.display.set_mode((1824, 1016))
-		#self.screen = pygame.display.set_mode((0,0), pygame.FULLSCREEN)
+		#self.screen = pygame.display.set_mode((1824, 1016))
+		self.screen = pygame.display.set_mode((0,0), pygame.FULLSCREEN)
 		self.bgimage = pygame.image.load("./img/background.png")
 		self.boardbg = self.loadImage("board.gif")
 		self.pieces = {}

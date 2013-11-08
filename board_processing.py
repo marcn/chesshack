@@ -58,7 +58,7 @@ class ChessCV():
 
 	def current_board(self):
 		frames = comparison_frames()
-		if self.classifier.compare_images_for_movement(frames[0], frames[1]):
+		if False and self.classifier.compare_images_for_movement(frames[0], frames[1]):
 			self.movement_fails += 1
 			if self.movement_fails > 4:
 				print "four consecutive movement fails -- attempting anyway"

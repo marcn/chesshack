@@ -31,8 +31,7 @@ class UserInterface:
 		#self.cv = MockCV()
 		self.cv.continuous = True
 		thread.start_new_thread(self.cvThread, (self,))
-		self.boardscan = np.ndarray(shape=(8,8), dtype=np.int8)
-		self.boardscan.fill(0)
+		self.clearBoardScan()
 		self.chess = None
 		self.boardScale = 1.5
 		self.considering = []
@@ -56,6 +55,10 @@ class UserInterface:
 		self.pieces['Q'] = self.loadImage("wq.png")
 		self.pieces['P'] = self.loadImage("wp.png")
 		pygame.display.flip()
+
+	def clearBoardScan(self):
+		self.boardscan = np.ndarray(shape=(8,8), dtype=np.int8)
+		self.boardscan.fill(0)
 
 	def loadImage(self, file):
 		img = pygame.image.load("./img/%s" % file).convert(32, pygame.SRCALPHA)
@@ -195,6 +198,7 @@ class UserInterface:
 							# It's not black's turn, engage the engine
 							self.engine.makeMove(self.chess.getFEN())
 							self.state = UserInterface.STATE_WAITING_FOR_ENGINE
+				self.clearBoardScan()
 			self.renderBoard()
 
 

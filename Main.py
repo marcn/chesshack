@@ -31,6 +31,9 @@ class UserInterface:
 		self.considering = []
 		self.lastConsider = None
 		self.waitingForEngine = False
+		self.screen = pygame.display.set_mode((800, 800))
+		#self.screen = pygame.display.set_mode((1824, 1016))
+		#self.screen = pygame.display.set_mode((0,0), pygame.FULLSCREEN)
 		self.bgimage = self.loadImage("53.png")
 		self.pieces = {}
 		self.pieces['r'] = self.loadImage("br.png")
@@ -45,15 +48,12 @@ class UserInterface:
 		self.pieces['K'] = self.loadImage("wk.png")
 		self.pieces['Q'] = self.loadImage("wq.png")
 		self.pieces['P'] = self.loadImage("wp.png")
-		self.screen = pygame.display.set_mode((800, 800))
-		#self.screen = pygame.display.set_mode((1824, 1016))
-		#self.screen = pygame.display.set_mode((0,0), pygame.FULLSCREEN)
 		pygame.display.flip()
 
 	def loadImage(self, file):
-		img = pygame.image.load("./img/%s" % file)
+		img = pygame.image.load("./img/%s" % file).convert(32, pygame.SRCALPHA)
 		rect = img.get_rect()
-		return pygame.transform.scale(img, (int(rect.w * self.boardScale), int(rect.h * self.boardScale)))
+		return pygame.transform.smoothscale(img, (int(rect.w * self.boardScale), int(rect.h * self.boardScale)))
 
 	def mainLoop(self):    
 		pygame.init()

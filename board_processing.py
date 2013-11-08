@@ -9,8 +9,7 @@ class ChessCV():
 
 	def __init__(self, scale=1, file_name=None):
 		self.scale = scale
-		if file_name is not None:
-			self.file_name = file_name
+		self.file_name = file_name
 
 	def current_board(self):
 		self.image = cv2.imread(self.file_name) if self.file_name is not None else next_frame()
@@ -168,6 +167,7 @@ if __name__ == "__main__":
 			test_variance()
 		elif sys.argv[1] == "camera":
 			while True:
-				img_out.show(next_frame())
+				cv2.imshow('win1', next_frame())
+
 	else:
 		ChessCV().current_board()

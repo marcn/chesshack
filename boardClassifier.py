@@ -115,7 +115,7 @@ class BoardClassifier:
                     numeric_classification_matrix[i][j] = -1;
                 else:
                     numeric_classification_matrix[i][j] = 0;
-        return numeric_classification_matrix
+        return np.array(numeric_classification_matrix, np.int8)
                     
         
 

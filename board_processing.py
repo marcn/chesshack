@@ -121,64 +121,40 @@ class ChessCV():
 		contours, hierarchy = cv2.findContours(img, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
 
 		timer.start("Find Largest")
-		best_match = (None, 0)
+		best_match = (None, 0, None)
 		for contour in contours:
 			area = cv2.contourArea(contour)
 			if area > 100:
 				peri = cv2.arcLength(contour, True)
 				approx = cv2.approxPolyDP(contour, 0.02 * peri, True)
 				if area > best_match[1] and len(approx) == 4:
-					best_match = (contour, area)
+					best_match = (contour, area, approx)
 
-		timer.start("Bounding box")
-		(tl, br), (tr, bl) = self.bounding_box(best_match[0])
+		mean_point = np.average(best_match[2], axis=0)[0]
 
-		timer.start("Nearest points * 4")
-		tl = self.find_nearest_point(tl, best_match[0])
-		br = self.find_nearest_point(br, best_match[0])
-		tr = self.find_nearest_point(tr, best_match[0])
-		bl = self.find_nearest_point(bl, best_match[0])
+		timer.start("Match polygon points")
+		tl, br, tr, bl = (None, None, None, None)
+		for point in best_match[2]:
+			point = point[0]
+			if point[0] < mean_point[0]:
+				if point[1] < mean_point[1]:
+					tl = point
+				elif point[1] > mean_point[1]:
+					bl = point
+			elif point[0] > mean_point[0]:
+				if point[1] < mean_point[1]:
+					tr = point
+				elif point[1] > mean_point[1]:
+					br = point
 
 		timer.done()
 		return (tl, tr, br, bl)
-
-	def find_nearest_point(self, pt, pts):
-		nearest = (None, 0)
-		for comp_point in pts:
-			distance = np.linalg.norm(pt - comp_point)
-			if nearest[0] is None or distance < nearest[1]:
-				nearest = (comp_point, distance)
-		return [nearest[0][0][0], nearest[0][0][1]]
 
 	def warp_perspective(self, img, tl, tr, br, bl):
 		x = lambda y: (y[0] / self.scale, y[1] / self.scale)
 		matrix = cv2.getPerspectiveTransform(np.array([x(tl), x(tr), x(br), x(bl)], np.float32), \
 											 np.array([[0, 0], [499, 0], [499, 499], [0, 499]], np.float32))
 		return cv2.warpPerspective(img, matrix, (500, 500))
-
-	def bounding_box(self, points):
-		tl = (None, None)
-		tr = (None, None)
-		bl = (None, None)
-		br = (None, None)
-		for (x, y) in [p[0] for p in points]:
-			if tl[0] is None or x < tl[0]:
-				tl = (x, tl[1])
-			if tl[1] is None or y < tl[1]:
-				tl = (tl[0], y)
-			if tr[0] is None or x > tr[0]:
-				tr = (x, tr[1])
-			if tr[1] is None or y < tr[1]:
-				tr = (tr[0], y)
-			if bl[0] is None or x < bl[0]:
-				bl = (x, bl[1])
-			if bl[1] is None or y > bl[1]:
-				bl = (bl[0], y)
-			if br[0] is None or x > br[0]:
-				br = (x, br[1])
-			if br[1] is None or y > br[1]:
-				br = (br[0], y)
-		return ((tl, br), (tr, bl))
 
 def test_variance():
 	dst_img = cv2.imread('board-pictures/test-variance.jpg')

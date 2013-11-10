@@ -156,69 +156,6 @@ class UserInterface:
 				self.engine.newGame()
 				self.topHeading = self.your_turn
 				self.dirtyUi = True
-
-				'''
-				self.chess.addTextMove("e2e4")
-				self.chess.addTextMove("e7e6")
-				self.chess.addTextMove("d2d4")
-				self.chess.addTextMove("d7d5")
-				self.chess.addTextMove("b1c3")
-				self.chess.addTextMove("f8b4")
-				self.chess.addTextMove("e4e5")
-				self.chess.addTextMove("c7c5")
-				self.chess.addTextMove("a2a3")
-				self.chess.addTextMove("b4c3")
-				self.chess.addTextMove("b2c3")
-				self.chess.addTextMove("b8c6")
-				self.chess.addTextMove("g1f3")
-				self.chess.addTextMove("g8e7")
-				self.chess.addTextMove("f1e2")
-				self.chess.addTextMove("e8g8")
-				self.chess.addTextMove("e1g1")
-				self.chess.addTextMove("c5c4")
-				self.chess.addTextMove("a3a4")
-				self.chess.addTextMove("c8d7")
-				self.chess.addTextMove("c1a3")
-				self.chess.addTextMove("d8a5")
-				self.chess.addTextMove("a3b2")
-				self.chess.addTextMove("f7f6")
-				self.chess.addTextMove("d1d2")
-				self.chess.addTextMove("f6e5")
-				self.chess.addTextMove("d4e5")
-				self.chess.addTextMove("e7g6")
-				self.chess.addTextMove("d2g5")
-				self.chess.addTextMove("f8f5")
-				self.chess.addTextMove("g5e3")
-				self.chess.addTextMove("c6e5")
-				self.chess.addTextMove("f3g5")
-				self.chess.addTextMove("e5g4")
-				self.chess.addTextMove("e2g4")
-				self.chess.addTextMove("f5e5")
-				self.chess.addTextMove("e3d2")
-				self.chess.addTextMove("a8f8")
-				self.chess.addTextMove("f2f4")
-				self.chess.addTextMove("g6f4")
-				self.chess.addTextMove("f1f4")
-				self.chess.addTextMove("h7h6")
-				self.chess.addTextMove("g5f3")
-				self.chess.addTextMove("e5e4")
-				self.chess.addTextMove("g2g3")
-				self.chess.addTextMove("e6e5")
-				self.chess.addTextMove("f4f8")
-				self.chess.addTextMove("g8f8")
-				self.chess.addTextMove("g4d7")
-				self.chess.addTextMove("d5d4")
-				self.chess.addTextMove("c3d4")
-				self.chess.addTextMove("a5c7")
-				self.chess.addTextMove("f3e5")
-				self.chess.addTextMove("f8e7")
-				self.chess.addTextMove("b2a3")
-				self.chess.addTextMove("e7d8")
-				self.chess.addTextMove("a1f1")
-				self.chess.addTextMove("c7b6")
-				self.chess.addTextMove("f1f8")
-				'''
-
 				self.state = UserInterface.STATE_WAITING_FOR_BOARD_CHANGE
 		elif self.state == UserInterface.STATE_WAITING_FOR_ENGINE:
 			if self.engine.bestmove is not None:
@@ -333,7 +270,6 @@ class UserInterface:
 	def updateConsideringLine(self):
 		now = time.time()
 		engine_considering = self.engine.considering
-		#if self.state == UserInterface.STATE_WAITING_FOR_ENGINE and engine_considering is not None and (self.lastConsider is None or (now - self.lastConsider > 0.1)):
 		if self.state == UserInterface.STATE_WAITING_FOR_ENGINE and engine_considering is not None:
 			if len(self.engine.considering) > 0:
 				latest = engine_considering[0]
@@ -413,8 +349,6 @@ class UserInterface:
 			x = files.find(self.requestedMove[0])
 			piece = self.chess.getBoard()[y][x]
 			self.screen.blit(self.pieces[piece],(boardOffsetX+x*square_size, boardOffsetY+y*square_size))
-
-		# Top heading
 
 		# Bottom heading
 		if self.bottomHeading is not None:
